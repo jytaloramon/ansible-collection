@@ -1,0 +1,5 @@
+# Required
+hostname_name: my-hostname
+
+# Default(false)
+hostname_preserve: true

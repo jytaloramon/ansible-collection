@@ -1,0 +1,4 @@
+- name: Set local system name
+  when: ansible_facts.system == "Linux" and not(hostname_preserve | default(false))
+  ansible.builtin.hostname:
+    name: "{{ hostname_name }}"
