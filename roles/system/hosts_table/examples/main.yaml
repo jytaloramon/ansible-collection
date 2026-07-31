@@ -1,0 +1,8 @@
+hosts_table_entries:
+  - ip_address: "127.0.1.1"
+    hostnames:
+      - my-hostname.myorg
+      - my-hostname
+
+# Default(false)
+hosts_table_cloud_init: true
