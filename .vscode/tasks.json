@@ -1,0 +1,26 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build virtual env",
+            "command": "/usr/bin/python",
+            "type": "shell",
+            "args": [
+                "-m",
+                "venv",
+                ".venv"
+            ],
+            "group": "none"
+        },
+        {
+            "label": "Install dependencies",
+            "command": ".venv/bin/pip",
+            "type": "shell",
+            "args": [
+                "install",
+                "ansible-dev-tools"
+            ],
+            "group": "none"
+        }
+    ]
+}
