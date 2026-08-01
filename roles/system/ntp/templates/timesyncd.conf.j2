@@ -1,0 +1,12 @@
+# systemd-timesyncd configuration file
+
+
+[Time]
+NTP={{ ntp_config.sources | map(attribute='hostname') | join(' ') }}
+
+RootDistanceMaxSec=5
+PollIntervalMinSec=90
+PollIntervalMaxSec=1800
+ConnectionRetrySec=90
+SaveIntervalSec=60
+

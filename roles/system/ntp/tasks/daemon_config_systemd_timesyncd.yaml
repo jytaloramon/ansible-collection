@@ -1,0 +1,27 @@
+- name: Systemd-timesyncd | Stop and disable service
+  ansible.builtin.service:
+    name: systemd-timesyncd
+    state: stopped
+    enabled: false
+
+- name: Systemd-timesyncd | Create directory - Config
+  ansible.builtin.file:
+    path: "{{ ntp_systemd_timesyncd_conf_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Systemd-timesyncd | Deploy configuration file
+  ansible.builtin.template:
+    src: templates/timesyncd.conf.j2
+    dest: "{{ ntp_systemd_timesyncd_conf_dir }}/timesyncd.conf"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Systemd-timesyncd | Start and enable service
+  ansible.builtin.service:
+    name: systemd-timesyncd
+    state: started
+    enabled: true

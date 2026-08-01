@@ -1,0 +1,20 @@
+# Chrony - logrotate
+
+{{ ntp_chrony_dir.logs }}/*.log {
+  {{ ntp_chrony_logrotate.frequency }}
+  rotate {{ ntp_chrony_logrotate.count }}
+  maxage {{ ntp_chrony_logrotate.max_age }}
+  missingok
+  notifempty
+  nocreate
+  dateext
+  dateformat {{ ntp_chrony_logrotate.date_format }}
+  compress
+  delaycompress
+  sharedscripts
+
+  postrotate
+    /usr/bin/chronyc cyclelogs > /dev/null 2>&1 || true
+  endscript
+}
+

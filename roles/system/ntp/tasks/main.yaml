@@ -1,0 +1,2 @@
+- name: Install packages for OS family
+  ansible.builtin.include_tasks: "{{ ansible_facts.os_family | lower }}.yaml"

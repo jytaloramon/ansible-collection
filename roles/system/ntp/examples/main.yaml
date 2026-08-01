@@ -1,0 +1,48 @@
+# Required, Options: [systemd-timesyncd, chrony]
+ntp_daemon: systemd-timesyncd
+
+ntp_config:
+  # Required
+  sources:
+    - type: pool # Default(server)
+      hostname: ntp.org # Required
+      options: "maxsources 4 minpoll 8 maxpoll 12 iburst" # Default(iburst)
+  # Chrony only
+  server:
+    access:
+      - type: allow # Default(deny)
+        subnet: "192.168.0.1" # Required
+
+# Systemd-timesyncd
+
+## Required
+ntp_systemd_timesyncd_conf_dir: /etc/systemd/timesyncd.conf.d
+
+# Chrony
+
+## Required (All properties)
+ntp_chrony_system:
+  name: _chrony
+  id: 1024
+  gecos: "Chrony Daemon"
+  shell: /usr/sbin/nologin
+  groups: []
+
+## Required (All properties)
+ntp_chrony_dir:
+  conf: /etc/chrony
+  data: /var/lib/chrony
+  logs: /var/log/chrony
+  run: /run/chrony
+
+## Required (All properties)
+ntp_chrony_file:
+  key: "{{ ntp_chrony_dir.conf }}/chrony.keys"
+  logrotate: /etc/logrotate.d/chrony
+
+## Required (all properties)
+ntp_chrony_logrotate:
+  frequency: daily
+  count: 200
+  max_age: 200
+  date_format: "-%Y%m%d"

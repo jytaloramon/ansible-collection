@@ -1,0 +1,21 @@
+- name: Systemd-timesyncd | Install and configure
+  when: ntp_daemon == 'systemd-timesyncd'
+  block:
+    - name: Systemd-timesyncd | Install packages
+      ansible.builtin.apt:
+        name: systemd-timesyncd
+        state: present
+
+    - name: Systemd-timesyncd | Deployment
+      ansible.builtin.include_tasks: daemon_config_systemd_timesyncd.yaml
+
+- name: Chrony | Install and configure
+  when: ntp_daemon == 'chrony'
+  block:
+    - name: Chrony | Install packages
+      ansible.builtin.apt:
+        name: chrony
+        state: present
+
+    - name: Chrony | Deployment
+      ansible.builtin.include_tasks: daemon_config_chrony.yaml

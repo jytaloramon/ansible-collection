@@ -1,0 +1,43 @@
+# Chrony configuration file
+
+# Core
+pidfile {{ ntp_chrony_dir.run }}/chronyd.pid
+
+keyfile {{ ntp_chrony_file.key }}
+
+# Time Sources
+{% for source in ntp_config.sources %}
+{{ source.type | default('server') }} {{ source.hostname }} {{ source.options | default('iburst') }}
+{% endfor %}
+
+sourcedir {{ ntp_chrony_dir.conf }}/sources.d
+
+ntsdumpdir {{ ntp_chrony_dir.data }}
+driftfile {{ ntp_chrony_dir.data }}/chrony.drift
+
+rtcsync
+leapsectz right/UTC
+
+makestep 1 3
+maxupdateskew 100.0
+
+{% if ntp_config.server is defined %}
+# Server
+clientloglimit 524288
+
+ratelimit interval 6 burst 8
+
+{% for client in ntp_config.server.access | default([]) %}
+{{ client.type | default('deny') }} {{ client.subnet }}
+{% endfor %}
+{% endif %}
+
+# Logging
+logdir {{ ntp_chrony_dir.logs }}
+logbanner 0
+
+log measurements statistics
+
+# Include configurations files
+confdir {{ ntp_chrony_dir.conf }}/conf.d
+

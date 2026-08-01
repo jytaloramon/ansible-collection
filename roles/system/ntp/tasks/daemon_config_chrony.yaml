@@ -1,0 +1,69 @@
+- name: Chrony | Stop and disable service
+  ansible.builtin.service:
+    name: chrony
+    state: stopped
+    enabled: false
+
+- name: Chrony | Create system groups
+  ansible.builtin.group:
+    name: "{{ ntp_chrony_system.name }}"
+    gid: "{{ ntp_chrony_system.id }}"
+    system: true
+    state: present
+
+- name: Chrony | Create system users
+  ansible.builtin.user:
+    name: "{{ ntp_chrony_system.name }}"
+    uid: "{{ ntp_chrony_system.id }}"
+    comment: "{{ ntp_chrony_system.gecos }}"
+    shell: "{{ ntp_chrony_system.shell }}"
+    password: "*"
+    create_home: false
+    home: "{{ ntp_chrony_dir.data }}"
+    group: "{{ ntp_chrony_system.name }}"
+    groups: "{{ ntp_chrony_system.groups }}"
+    state: present
+
+- name: Chrony | Create key file
+  ansible.builtin.file:
+    path: "{{ ntp_chrony_file.key }}"
+    state: file
+    owner: root
+    group: "{{ ntp_chrony_system.name }}"
+    mode: "0640"
+
+- name: Chrony | Deploy chrony.conf file
+  ansible.builtin.template:
+    src: templates/chrony.conf.j2
+    dest: "{{ ntp_chrony_dir.conf }}/chrony.conf"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Chrony | Create directories - Data and Logs
+  ansible.builtin.file:
+    path: "{{ directory }}"
+    state: directory
+    owner: "{{ ntp_chrony_system.name }}"
+    group: "{{ ntp_chrony_system.name }}"
+    mode: "0750"
+  loop:
+    - "{{ ntp_chrony_dir.data }}"
+    - "{{ ntp_chrony_dir.logs }}"
+  loop_control:
+    loop_var: directory
+    label: "{{ directory }}"
+
+- name: Chrony | Deploy logrotate configuration
+  ansible.builtin.template:
+    src: templates/chrony.logrotate.j2
+    dest: "{{ ntp_chrony_file.logrotate }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Chrony | Start and enable service
+  ansible.builtin.service:
+    name: chrony
+    state: started
+    enabled: true
