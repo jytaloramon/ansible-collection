@@ -1,0 +1,24 @@
+# Required
+locale_locales:
+  - pt_BR.UTF-8
+  - en_US.UTF-8
+
+# Required
+locale_kbd:
+  keymap: br-abnt2
+  model: pc105
+  layout: br
+  variant: ""
+  options: ""
+  backspace: guess
+
+# Required
+locale_dir:
+  keymaps: /usr/share/keymaps
+  tmp: /tmp
+
+# Required
+locale_kbd_pkg:
+  version: "2.9.0"
+  hash: sha256:001e923460430c93c67e145b4aea533f82f205dbf84b79c898a1199900cf5fac
+  file: "/tmp/kbd-{{ locale_kbd_pkg.version }}.tar.gz"
