@@ -1,0 +1,6 @@
+# Required (All properties)
+zabbix_repo_pkg:
+  version: "7.0"
+
+# Required
+zabbix_repo_tmp_dir: /tmp

@@ -1,0 +1,18 @@
+- name: Download package
+  ansible.builtin.get_url:
+    url: "https://repo.zabbix.com/zabbix/{{ zabbix_repo_pkg.version }}/{{
+      ansible_facts.distribution | lower }}/pool/main/z/zabbix-release/zabbix-release_latest_{{
+      zabbix_repo_pkg.version }}+{{ ansible_facts.distribution | lower }}{{ ansible_facts.distribution_version }}_all.deb"
+    dest: "{{ zabbix_repo_tmp_dir }}/zabbix-repo.deb"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install packages
+  ansible.builtin.command:
+    cmd: "dpkg -i {{ zabbix_repo_tmp_dir }}/zabbix-repo.deb"
+  changed_when: true
+
+- name: Synchronize APT package information
+  ansible.builtin.apt:
+    update_cache: true
