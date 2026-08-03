@@ -1,0 +1,74 @@
+# OpenSSH Daemon configuration file
+
+# Core
+PidFile {{ ssh_dir.run }}/sshd.pid
+
+# Listen
+AddressFamily any
+ListenAddress 0.0.0.0
+Port {{ ssh_config.port | default(22)}}
+
+# Authentication
+AuthenticationMethods {{ ssh_config.auth.methods | default(['publickey']) | join(' ') }}  
+
+UsePAM yes
+
+PermitRootLogin no
+PermitEmptyPasswords no
+
+PasswordAuthentication {{ 'yes' if ssh_config.auth.enabled_password | default(false) else 'no' }} 
+PubkeyAuthentication {{ 'yes' if ssh_config.auth.enabled_pubkey | default(true) else 'no' }} 
+KbdInteractiveAuthentication no
+KerberosAuthentication no
+GSSAPIAuthentication no
+
+# Access
+{% if ssh_config.access.deny_users | default([]) %}
+DenyUsers {{ ssh_config.access.deny_users | join(' ') }}
+{% endif %}
+{% if ssh_config.access.allow_users | default([]) %}
+AllowUsers {{ ssh_config.access.allow_users | join(' ') }}
+{% endif %}
+{% if ssh_config.access.deny_groups | default([]) %}
+DenyGroups {{ ssh_config.access.deny_groups | join(' ') }}
+{% endif %}
+{% if ssh_config.access.allow_groups | default([]) %}
+AllowGroups {{ ssh_config.access.allow_groups | join(' ') }}
+{% endif %}
+
+# Protection
+LoginGraceTime 90s
+
+MaxAuthTries 5
+MaxSessions 10
+MaxStartups 10:20:70
+
+# Security
+{% for key in ssh_keys_filename %}
+HostKey {{ ssh_dir.conf }}/{{ key }}
+{% endfor%}
+
+TrustedUserCAKeys none
+RevokedKeys none
+
+RequiredRSASize 3072
+
+# Connection
+ClientAliveCountMax 4
+ClientAliveInterval 15
+
+# Logging
+LogLevel INFO
+
+# Others
+PrintMotd yes
+PrintLastLog yes
+
+Subsystem sftp /usr/lib/openssh/sftp-server
+
+# Environment variables
+AcceptEnv LANG LC_*
+
+# Include files
+Include {{ ssh_dir.conf }}/sshd_config.d/*.conf
+

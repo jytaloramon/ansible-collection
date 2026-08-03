@@ -1,0 +1,22 @@
+ssh_config:
+  port: 2222 # Default(22)
+  auth:
+    methods: [] # Default(['publickey'])
+    enabled_password: true # Default(false)
+    enabled_pubkey: false # Default(true)
+  access:
+    allow_users: []
+    deny_users: []
+    allow_groups: ["ssh-group"]
+    deny_groups: []
+
+# Required (All properties)
+ssh_dir:
+  conf: /etc/ssh
+  run: /run
+
+# Required
+ssh_keys_filename:
+  - ssh_host_ecdsa_key
+  - ssh_host_ed25519_key
+  - ssh_host_rsa_key
