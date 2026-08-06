@@ -1,0 +1,22 @@
+{
+{% if docker_rootless | default(true) %}
+  "userns-remap": "{{ docker_system.namespace.name }}",
+{% endif %}
+  "default-ulimits": {
+    "nofile": {
+      "Name": "nofile",
+      "Soft": 32768,
+      "Hard": 32768
+    }
+  },
+  "log-driver": "json-file",
+  "log-level": "info",
+  "log-opts": {
+    "max-file": "5",
+    "max-size": "10m",
+    "compress": "false"
+  },
+  "max-concurrent-downloads": 5,
+  "max-concurrent-uploads": 5,
+  "max-download-attempts": 5
+}

@@ -1,0 +1,5 @@
+# Required
+docker_repo_gpgkey_file: /usr/share/keyrings/docker.gpg
+
+# Required
+docker_repo_tmp_dir: /tmp

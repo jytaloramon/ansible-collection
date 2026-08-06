@@ -1,0 +1,100 @@
+- name: Stop and disable service
+  ansible.builtin.service:
+    name: docker
+    state: stopped
+    enabled: false
+
+- name: Stop and disable service - Socket
+  ansible.builtin.service:
+    name: docker.socket
+    state: stopped
+    enabled: false
+
+- name: Create system groups - Engine
+  ansible.builtin.group:
+    name: "{{ docker_system.engine.name }}"
+    gid: "{{ docker_system.engine.id }}"
+    system: true
+    state: present
+
+- name: Docker Rootless
+  when: docker_rootless | default(true)
+  block:
+    - name: Create system groups - Rootless
+      ansible.builtin.group:
+        name: "{{ docker_system.namespace.name }}"
+        gid: "{{ docker_system.namespace.id }}"
+        system: true
+        state: present
+
+    - name: Create system users - Rootless
+      ansible.builtin.user:
+        name: "{{ docker_system.namespace.name }}"
+        uid: "{{ docker_system.namespace.id }}"
+        comment: "{{ docker_system.namespace.gecos }}"
+        shell: "{{ docker_system.namespace.shell }}"
+        password: "*"
+        create_home: false
+        home: "{{ docker_dir.data }}"
+        group: "{{ docker_system.namespace.name }}"
+        groups: "{{ docker_system.namespace.groups }}"
+        system: true
+        state: present
+
+    - name: Configure Rootless namespace - SubUID
+      ansible.builtin.lineinfile:
+        path: /etc/subuid
+        regexp: "^{{ docker_system.namespace.name }}:.+$"
+        line: "{{ docker_system.namespace.name }}:{{ docker_system.namespace.map_uid.start }}:{{ docker_system.namespace.map_uid.limit }}"
+        state: present
+
+    - name: Configure Rootless namespace - SubGID
+      ansible.builtin.lineinfile:
+        path: /etc/subgid
+        regexp: "^{{ docker_system.namespace.name }}:.+$"
+        line: "{{ docker_system.namespace.name }}:{{ docker_system.namespace.map_gid.start }}:{{ docker_system.namespace.map_gid.limit }}"
+        state: present
+
+- name: Create directory - Configuration
+  ansible.builtin.file:
+    path: "{{ docker_dir.conf }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy configuration file
+  ansible.builtin.template:
+    src: templates/daemon.json.j2
+    dest: "{{ docker_dir.conf }}/daemon.json"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Deploy script - Docker Cron Dispatch
+  ansible.builtin.copy:
+    src: files/docker-cron-dispatch.sh
+    dest: "{{ docker_dir.bin }}/docker-cron-dispatch.sh"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy cron configuration - Docker Cron Dispatch
+  ansible.builtin.copy:
+    src: files/docker-cron-dispatch
+    dest: "{{ docker_dir.cron }}/docker-cron-dispatch"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Start and enable service - Socket
+  ansible.builtin.service:
+    name: docker.socket
+    state: started
+    enabled: true
+
+- name: Start and enable service
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true

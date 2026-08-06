@@ -1,0 +1,13 @@
+# Docker Cron Dispatch
+
+SHELL=/bin/bash
+
+# Run once per minute.
+* * * * * root docker-cron-dispatch.sh minute.sh > /dev/null 2>&1
+
+# Run once an hour. At minute 0.
+0 * * * * root docker-cron-dispatch.sh hourly.sh > /dev/null 2>&1
+
+# Run once a day. At 00:00.
+0 0 * * * root docker-cron-dispatch.sh daily.sh > /dev/null 2>&1
+

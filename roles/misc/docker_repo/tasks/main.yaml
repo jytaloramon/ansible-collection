@@ -1,0 +1,13 @@
+- name: Set OS family
+  ansible.builtin.set_fact:
+    docker_repo_os_family: "{{ ansible_facts.os_family | lower }}"
+
+- name: OS support check
+  ansible.builtin.assert:
+    that: "docker_repo_os_family in ['debian']"
+    success_msg: "Supported OS family."
+    fail_msg: "Unsupported OS family."
+    quiet: true
+
+- name: Include OS family tasks
+  ansible.builtin.include_tasks: "{{ docker_repo_os_family }}.yaml"
