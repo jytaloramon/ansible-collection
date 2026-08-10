@@ -1,0 +1,57 @@
+env: {}
+
+service:
+  # Geral
+  flush: 10
+  grace: 30
+
+  hot_reload: "{{ 'on' if fluentbit_instc_config.enabled_hot_reload | default(true) else 'off' }}"
+  hot_reload.timeout: 15
+
+  parsers_file: parsers.yaml
+  plugins_file: plugins.yaml
+
+  health_check: "on"
+  hc_errors_count: 10
+  hc_retry_failure_count: 5
+  hc_period: 60
+
+  multiline_buffer_limit: "2MB"
+  json.convert_nan_to_null: true
+
+  # Scheduling and retries
+  scheduler.base: 5
+  scheduler.cap: 900
+
+  # Logging
+  log_file: {{ fluentbit_dir.logs }}/fluent-bit.log
+  log_level: {{ fluentbit_instc_config.log_level | default('info') }}
+
+  # HTTP
+{% if fluentbit_instc_config.http_server is defined %}
+  http_server: "on"
+  http_listen: "{{ fluentbit_instc_config.http_server.ip_address | default('127.0.0.1') }}"
+  http_port: "{{ fluentbit_instc_config.http_server.port | default('2020') }}"
+{% endif %}
+
+  # Storage
+  storage.type: filesystem
+  storage.inherit: "on"
+  storage.path: {{ fluentbit_dir.data }}/storage
+  storage.rejected.path: {{ fluentbit_dir.logs }}/dead-letter
+  storage.sync: normal
+  storage.checksum: "on"
+  storage.max_chunks_up: 256
+  storage.delete_irrecoverable_chunks: "on"
+  storage.trim_files: "on"
+  storage.keep.rejected:  "off"
+  storage.backlog.flush_on_shutdown: "off"
+  storage.backlog.mem_limit: "15M"
+  storage.metrics: "on"
+
+includes:
+  - multiline-parsers.yaml
+  - filters.yaml
+  - outputs.yaml
+  - inputs/*.yaml
+

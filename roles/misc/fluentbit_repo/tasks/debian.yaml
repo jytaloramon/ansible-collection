@@ -1,0 +1,24 @@
+- name: Download signing key
+  ansible.builtin.get_url:
+    url: https://packages.fluentbit.io/fluentbit.key
+    dest: "{{ fluentbit_repo_tmp_dir }}/fluentbit.gpg.asc"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Install signing key
+  ansible.builtin.command:
+    cmd: "gpg --dearmor --yes -o {{ fluentbit_repo_gpgkey_file }} {{ fluentbit_repo_tmp_dir }}/fluentbit.gpg.asc"
+  changed_when: true
+
+- name: Install APT repository
+  ansible.builtin.template:
+    src: templates/apt.sources.j2
+    dest: /etc/apt/sources.list.d/fluent-bit.sources
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Synchronize APT package information
+  ansible.builtin.apt:
+    update_cache: true

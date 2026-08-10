@@ -1,0 +1,10 @@
+pipeline:
+{% if fluentbit_instc_config.filters | default([]) %}
+  filters:
+{% for entry in fluentbit_instc_config.filters %}
+    - {{ entry }}
+{% endfor %}
+{% else %}
+  filters: []
+{% endif %}
+

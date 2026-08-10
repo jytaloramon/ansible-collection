@@ -1,0 +1,6 @@
+Types: deb
+URIs: https://packages.fluentbit.io/{{ ansible_facts.distribution | lower }}/{{ ansible_facts.distribution_release }}
+Suites: {{ ansible_facts.distribution_release }}
+Components: main
+Signed-By: {{ fluentbit_repo_gpgkey_file }}
+

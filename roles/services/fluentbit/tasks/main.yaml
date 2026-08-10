@@ -1,0 +1,25 @@
+- name: Set OS family
+  ansible.builtin.set_fact:
+    fluentbit_os_family: "{{ ansible_facts.os_family | lower }}"
+
+- name: OS support check
+  ansible.builtin.assert:
+    that: "fluentbit_os_family in ['debian']"
+    success_msg: "Supported OS family."
+    fail_msg: "Unsupported OS family."
+    quiet: true
+
+- name: Load Vault
+  when: fluentbit_config.vault_file is defined
+  ansible.builtin.include_vars:
+    file: "{{ fluentbit_config.vault_file }}"
+    name: fluentbit_instc_vault
+
+- name: Load config
+  when: fluentbit_config.config_file is defined
+  ansible.builtin.include_vars:
+    file: "{{ fluentbit_config.config_file }}"
+    name: fluentbit_instc_config
+
+- name: Include OS family tasks
+  ansible.builtin.include_tasks: "{{ fluentbit_os_family }}.yaml"

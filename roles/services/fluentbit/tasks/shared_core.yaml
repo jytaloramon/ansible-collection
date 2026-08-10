@@ -1,0 +1,95 @@
+- name: Stop and disable service
+  ansible.builtin.service:
+    name: fluent-bit
+    state: stopped
+    enabled: false
+
+- name: Remove classic configurations files
+  ansible.builtin.file:
+    path: "{{ fluentbit_dir.conf }}/{{ filename }}"
+    state: absent
+  loop:
+    - fluent-bit.conf
+    - parsers.conf
+    - plugins.conf
+  loop_control:
+    loop_var: filename
+    label: "{{ filename }}"
+
+- name: Copy base configuration
+  ansible.builtin.copy:
+    src: files/
+    dest: "{{ fluentbit_dir.conf }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Deploy FluentBit configuration file
+  ansible.builtin.template:
+    src: "templates/fluent-bit.yaml.j2"
+    dest: "{{ fluentbit_dir.conf }}/fluent-bit.yaml"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Deploy filter configuration file
+  ansible.builtin.template:
+    src: "templates/filters.yaml.j2"
+    dest: "{{ fluentbit_dir.conf }}/filters.yaml"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Deploy output configuration file
+  ansible.builtin.template:
+    src: "templates/outputs.yaml.j2"
+    dest: "{{ fluentbit_dir.conf }}/outputs.yaml"
+    owner: root
+    group: root
+    mode: "0640"
+
+- name: Create directories - Inputs, Data and Logs
+  ansible.builtin.file:
+    path: "{{ directory }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+  loop:
+    - "{{ fluentbit_dir.conf }}/inputs"
+    - "{{ fluentbit_dir.data }}/storage"
+    - "{{ fluentbit_dir.logs }}"
+    - "{{ fluentbit_dir.logs }}/dead-letter"
+  loop_control:
+    loop_var: directory
+    label: "{{ directory }}"
+
+- name: Create directory - Systemd Service
+  ansible.builtin.file:
+    path: "{{ fluentbit_dir.systemd_service }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy Systemd Service - Override
+  ansible.builtin.template:
+    src: templates/service-override.conf.j2
+    dest: "{{ fluentbit_dir.systemd_service }}/override.conf"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Deploy logrotate configuration
+  ansible.builtin.template:
+    src: templates/logrotate.j2
+    dest: "{{ fluentbit_logrotate.file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Start and enable service
+  ansible.builtin.service:
+    name: fluent-bit
+    state: started
+    enabled: true

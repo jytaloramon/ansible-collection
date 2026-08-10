@@ -1,0 +1,24 @@
+# Fluent Bit - logrotate
+
+{{ fluentbit_dir.logs }}/*.log {
+  {{ fluentbit_logrotate.frequency }}
+  rotate {{ fluentbit_logrotate.count }}
+  maxage {{ fluentbit_logrotate.max_age }}
+  missingok
+  notifempty
+  nocreate
+  dateext
+  dateformat {{ fluentbit_logrotate.date_format }}
+  compress
+  delaycompress
+  sharedscripts
+
+  postrotate
+    pid_target="$(pidof fluent-bit)"
+
+    if [ -n "$pid_target" ]; then
+      kill -USR1 "$pid_target"
+    fi
+  endscript
+}
+

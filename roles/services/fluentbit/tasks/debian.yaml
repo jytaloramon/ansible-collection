@@ -1,0 +1,7 @@
+- name: Install packages
+  ansible.builtin.apt:
+    name: fluent-bit
+    state: present
+
+- name: Configure Core
+  ansible.builtin.import_tasks: shared_core.yaml

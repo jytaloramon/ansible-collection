@@ -1,0 +1,19 @@
+enabled_hot_reload: false # Default(true)
+
+http_server:
+  ip_address: 0.0.0.0 # Default(127.0.0.1)
+  port: 1024 # Default(2020)
+
+# Default(info)
+log_level: debug
+
+# Default([])
+filters:
+  - name: grep
+    match: "*"
+    regex: log aa
+
+# Default([])
+outputs:
+  - name: stdout
+    match: "*"
