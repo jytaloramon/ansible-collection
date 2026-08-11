@@ -1,0 +1,2 @@
+# Required
+proxmox_repo_gpgkey_file: /usr/share/keyrings/proxmox-archive-keyring.gpg

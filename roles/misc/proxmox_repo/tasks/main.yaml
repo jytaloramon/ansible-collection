@@ -1,0 +1,27 @@
+- name: Remove APT repositories
+  ansible.builtin.file:
+    path: "/etc/apt/sources.list.d/{{ source_name }}"
+    state: absent
+  loop:
+    - pve-enterprise.sources
+  loop_control:
+    loop_var: source_name
+    label: "{{ source_name }}"
+
+- name: Install APT repositories
+  ansible.builtin.template:
+    src: "templates/apt_{{ source_name }}.j2"
+    dest: "/etc/apt/sources.list.d/{{ source_name }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - proxmox.sources
+    - ceph.sources
+  loop_control:
+    loop_var: source_name
+    label: "{{ source_name }}"
+
+- name: Synchronize APT package information
+  ansible.builtin.apt:
+    update_cache: true
