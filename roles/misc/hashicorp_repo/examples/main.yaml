@@ -1,0 +1,5 @@
+# Required
+hashicorp_repo_gpgkey_file: /usr/share/keyrings/hashicorp-archive-keyring.gpg
+
+# Required
+hashicorp_repo_tmp_dir: /tmp

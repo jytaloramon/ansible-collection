@@ -1,0 +1,30 @@
+- name: Get pkg architecture
+  ansible.builtin.command:
+    cmd: dpkg --print-architecture
+  register: hashicorp_repo_arch
+  changed_when: true
+
+- name: Download Signing Key
+  ansible.builtin.get_url:
+    url: "https://apt.releases.hashicorp.com/gpg"
+    dest: "{{ hashicorp_repo_tmp_dir }}/hashicorp.gpg.asc"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Install signing key
+  ansible.builtin.command:
+    cmd: "gpg --dearmor --yes -o {{ hashicorp_repo_gpgkey_file }} {{ hashicorp_repo_tmp_dir }}/hashicorp.gpg.asc"
+  changed_when: true
+
+- name: Install APT repository
+  ansible.builtin.template:
+    src: templates/apt.sources.j2
+    dest: /etc/apt/sources.list.d/hashicorp.sources
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Synchronize APT package information
+  ansible.builtin.apt:
+    update_cache: true

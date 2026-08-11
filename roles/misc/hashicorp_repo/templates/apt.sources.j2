@@ -1,0 +1,7 @@
+Types: deb
+URIs: https://apt.releases.hashicorp.com
+Suites: {{ ansible_facts.distribution_release }}
+Components: main
+Architectures: {{ hashicorp_repo_arch.stdout }}
+Signed-By: {{ hashicorp_repo_gpgkey_file }}
+
