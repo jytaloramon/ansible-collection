@@ -1,0 +1,23 @@
+- name: Install and configure - Linux
+  when: ansible_facts.system == 'Linux'
+  block:
+    - name: Install logrotate package
+      ansible.builtin.package:
+        name: logrotate
+        state: present
+
+    - name: Create configuration directory
+      ansible.builtin.file:
+        path: /etc/logrotate.d
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Deploy logrotate configuration
+      ansible.builtin.copy:
+        src: files/logrotate.conf
+        dest: /etc/logrotate.conf
+        owner: root
+        group: root
+        mode: "0644"
