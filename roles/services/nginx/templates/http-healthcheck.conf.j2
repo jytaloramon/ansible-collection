@@ -1,0 +1,36 @@
+# Virtual Server HTTP.
+# Nginx Healthcheck.
+
+server {
+    # Config
+    listen {{ nginx_instc_config.healthcheck.address | default('*')}}:443 ssl;
+    server_name {{ nginx_instc_config.healthcheck.names | join(' ') }};
+
+    # SSL
+    ssl_certificate {{ nginx_instc_config.healthcheck.tls.cert_file }};
+    ssl_certificate_key {{ nginx_instc_config.healthcheck.tls.pkey_file }};
+
+    # Access limit
+{% for client in nginx_instc_config.healthcheck.allowed_clients | default(['127.0.0.0/8']) %}
+    allow {{ client }};
+{% endfor %}
+    deny all;
+
+    # Logging
+    error_log {{ nginx_instc_ctx.dir.logs }}/http-healthcheck.error.log {{ nginx_logging.error_level }};
+    access_log off;
+
+    location = /health {
+        # Request limit
+        limit_req zone=healthcheck_reqlimit burst=5 nodelay;
+
+        default_type application/json;
+
+        try_files /nonexistent @health;
+    }
+
+    location @health {
+        return 200 '{"status":"OK"}';
+    }
+}
+

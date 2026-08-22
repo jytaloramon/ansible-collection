@@ -1,0 +1,69 @@
+- name: Set OS info
+  ansible.builtin.set_fact:
+    nginx_os_family: "{{ ansible_facts.os_family | lower }}"
+
+- name: OS family support check
+  ansible.builtin.assert:
+    that: "nginx_os_family in ['debian', 'redhat']"
+    success_msg: "Supported OS family."
+    fail_msg: "Unsupported OS family: {{ nginx_os_family }}."
+    quiet: true
+
+- name: Load instance data
+  ansible.builtin.import_tasks: load_dynamic_files.yaml
+
+- name: Set instance context
+  ansible.builtin.set_fact:
+    nginx_instance_ctx:
+      deploy: native
+      dir:
+        conf: "{{ nginx_dir.conf }}"
+        data: "{{ nginx_dir.data }}"
+        cache: "{{ nginx_dir.cache }}"
+        logs: "{{ nginx_dir.logs }}"
+        modules: "{{ '/usr/lib/nginx/modules' if nginx_os_family == 'debian' else '/usr/lib64/nginx/modules' }}"
+      root:
+        uid: 0
+        gid: 0
+      user:
+        uid: "{{ nginx_user.native.uid }}"
+        gid: "{{ nginx_user.native.gid }}"
+
+- name: Install and Configure OS family based
+  ansible.builtin.include_tasks: "linux_{{ nginx_os_family }}.yaml"
+
+- name: Stop and disable service
+  ansible.builtin.service:
+    name: nginx
+    state: stopped
+    enabled: false
+
+- name: Create system groups
+  ansible.builtin.group:
+    name: "{{ nginx_user.native.name }}"
+    gid: "{{ nginx_user.native.gid }}"
+    system: true
+    state: present
+
+- name: Create system users
+  ansible.builtin.user:
+    name: "{{ nginx_user.native.name }}"
+    uid: "{{ nginx_user.native.uid }}"
+    password: "*"
+    group: "{{ nginx_user.native.name }}"
+    groups: "{{ nginx_user.native.groups }}"
+    create_home: false
+    home: "{{ nginx_dir.data }}"
+    shell: "{{ nginx_user.native.shell }}"
+    comment: "{{ nginx_user.native.gecos }}"
+    system: true
+    state: present
+
+- name: Deploy shared core
+  ansible.builtin.import_tasks: deploy_shared_core.yaml
+
+- name: Start and enable service
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: true

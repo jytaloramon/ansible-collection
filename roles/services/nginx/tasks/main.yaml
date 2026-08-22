@@ -1,0 +1,10 @@
+- name: Native deployment
+  when: nginx_native_instance is defined
+  ansible.builtin.include_tasks: deploy_native.yaml
+
+- name: Container deployment
+  ansible.builtin.include_tasks: deploy_container.yaml
+  loop: "{{ nginx_instances | default([]) }}"
+  loop_control:
+    loop_var: nginx_instance
+    label: "{{ nginx_instance.name }}"

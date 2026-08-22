@@ -1,0 +1,15 @@
+# Virtual Server HTTP.
+# Default HTTP server.
+
+server {
+    # Base
+    listen *:443 default_server ssl;
+
+    # Logging
+    error_log {{ nginx_instc_ctx.dir.logs }}/http-default.error.log {{ nginx_logging.error_level }};
+    access_log {{ nginx_instc_ctx.dir.logs }}/http-default.access.log {{ nginx_logging.access.format_name }} buffer={{ nginx_logging.access.buffer_size }} flush={{ nginx_logging.access.flush_time }};
+
+    # Return Nginx non-standard code 444 - Closes the connection.
+    return 444;
+}
+

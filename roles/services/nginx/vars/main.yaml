@@ -1,0 +1,24 @@
+nginx_user:
+  native:
+    name: nginx
+    uid: 1024
+    gid: 1024
+    gecos: Nginx
+    shell: /usr/sbin/nologin
+    groups: []
+  docker:
+    uid: 2048
+    gid: 2048
+
+nginx_dir:
+  conf: /etc/nginx
+  data: /var/lib/nginx
+  cache: /var/cache/nginx
+  logs: /var/log/nginx
+
+nginx_logging:
+  error_level: warn
+  access:
+    format_name: combined
+    buffer_size: "64k"
+    flush_time: "30s"

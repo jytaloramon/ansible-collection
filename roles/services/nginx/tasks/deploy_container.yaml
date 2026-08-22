@@ -1,0 +1,61 @@
+- name: Load dynamic files
+  ansible.builtin.import_tasks: load_dynamic_files.yaml
+
+- name: Set instance context
+  ansible.builtin.set_fact:
+    nginx_instc_ctx:
+      deploy: container
+      dir:
+        conf: "{{ docker_facts_root_dir }}/volumes/{{ nginx_instance.deployment.volumes.conf }}/_data"
+        data: "{{ docker_facts_root_dir }}/volumes/{{ nginx_instance.deployment.volumes.data }}/_data"
+        cache: "{{ docker_facts_root_dir }}/volumes/{{ nginx_instance.deployment.volumes.cache }}/_data"
+        logs: "{{ docker_facts_root_dir }}/volumes/{{ nginx_instance.deployment.volumes.logs }}/_data"
+        modules: /usr/lib/nginx/modules
+      root:
+        uid: "{{ docker_facts_ns_base_uid | default(0) }}"
+        gid: "{{ docker_facts_ns_base_gid | default(0) }}"
+      user:
+        uid: "{{ (docker_facts_ns_base_uid | default(0)) + nginx_user.docker.uid }}"
+        gid: "{{ (docker_facts_ns_base_gid | default(0)) + nginx_user.docker.gid }}"
+
+- name: Down Stack
+  community.docker.docker_stack:
+    name: "{{ nginx_instance.deployment.stack_name }}"
+    state: absent
+    detach: false
+
+- name: Create volume
+  community.docker.docker_volume:
+    volume_name: "{{ vol_name }}"
+    driver: local
+  loop:
+    - "{{ nginx_instance.deployment.volumes.conf }}"
+    - "{{ nginx_instance.deployment.volumes.data }}"
+    - "{{ nginx_instance.deployment.volumes.cache }}"
+    - "{{ nginx_instance.deployment.volumes.logs }}"
+  loop_control:
+    loop_var: vol_name
+    label: "{{ vol_name }}"
+
+- name: Import shared core tasks
+  when: not(nginx_instance.deployment.fast_bootstrap | default(false))
+  ansible.builtin.import_tasks: deploy_shared_core.yaml
+
+- name: Deploy Stack file
+  ansible.builtin.template:
+    src: "{{ nginx_instance.deployment.compose_file }}"
+    dest: "/tmp/{{ nginx_instance.deployment.stack_name }}.docker-compose.yaml"
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Deploy Stack
+  community.docker.docker_stack:
+    name: "{{ nginx_instance.deployment.stack_name }}"
+    compose: "/tmp/{{ nginx_instance.deployment.stack_name }}.docker-compose.yaml"
+    state: present
+
+- name: Remove Stack file
+  ansible.builtin.file:
+    path: "/tmp/{{ nginx_instance.deployment.stack_name }}.docker-compose.yaml"
+    state: absent

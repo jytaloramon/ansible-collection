@@ -1,0 +1,15 @@
+# Virtual Server HTTP.
+# Permanently redirects from HTTP (80) to HTTPS (443) protocol.
+
+server {
+    # Base
+    listen *:80 default_server;
+
+    # Logging
+    error_log {{ nginx_instc_ctx.dir.logs }}/http-redirect_to_https.error.log {{ nginx_logging.error_level }};
+    access_log {{ nginx_instc_ctx.dir.logs }}/http-redirect_to_https.access.log {{ nginx_logging.access.format_name }} buffer={{ nginx_logging.access.buffer_size }} flush={{ nginx_logging.access.flush_time }};
+
+    # Redirect all requests to HTTPs.
+    return 308 https://$host$request_uri;
+}
+

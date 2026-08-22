@@ -1,0 +1,102 @@
+- name: Create directory - Config
+  ansible.builtin.file:
+    path: "{{ nginx_instc_ctx.dir.conf }}"
+    state: directory
+    owner: "{{ nginx_instc_ctx.root.uid }}"
+    group: "{{ nginx_instc_ctx.root.gid }}"
+    mode: "0755"
+
+- name: Remove defaults configurations
+  ansible.builtin.file:
+    path: "{{ nginx_instc_ctx.dir.conf }}/{{ filename }}"
+    state: absent
+  loop:
+    - fastcgi.conf
+    - fastcgi.conf.default
+    - fastcgi_params
+    - fastcgi_params.default
+    - koi-utf
+    - koi-win
+    - mime.types.default
+    - nginx.conf.default
+    - scgi_params
+    - scgi_params.default
+    - uwsgi_params
+    - uwsgi_params.default
+    - win-utf
+    - default.d
+  loop_control:
+    loop_var: filename
+    label: "{{ filename }}"
+
+- name: Create directory - Nginx entries
+  ansible.builtin.file:
+    path: "{{ nginx_instc_ctx.dir.conf }}/conf.d"
+    state: directory
+    owner: "{{ nginx_instc_ctx.root.uid }}"
+    group: "{{ nginx_instc_ctx.root.gid }}"
+    mode: "0755"
+
+- name: Create directory - Modules
+  ansible.builtin.file:
+    src: "{{ nginx_instc_ctx.dir.modules }}"
+    dest: "{{ nginx_instc_ctx.dir.conf }}/modules"
+    state: link
+
+- name: Create directories - Data, cache, logs
+  ansible.builtin.file:
+    path: "{{ directory }}"
+    state: directory
+    owner: "{{ nginx_instc_ctx.user.uid }}"
+    group: "{{ nginx_instc_ctx.user.gid }}"
+    mode: "0750"
+  loop:
+    - "{{ nginx_instc_ctx.dir.data }}"
+    - "{{ nginx_instc_ctx.dir.cache }}"
+    - "{{ nginx_instc_ctx.dir.logs }}"
+  loop_control:
+    loop_var: directory
+    label: "{{ directory }}"
+
+- name: Copy Snippets
+  ansible.builtin.copy:
+    src: files/snippets
+    dest: "{{ nginx_instc_ctx.dir.conf }}"
+    owner: "{{ nginx_instc_ctx.root.uid }}"
+    group: "{{ nginx_instc_ctx.root.gid }}"
+    mode: "0640"
+    directory_mode: "0755"
+
+- name: Deploy configurations - nginx and nginx-http
+  ansible.builtin.template:
+    src: "templates/{{ filename }}.j2"
+    dest: "{{ nginx_instc_ctx.dir.conf }}/{{ filename }}"
+    owner: "{{ nginx_instc_ctx.root.uid }}"
+    group: "{{ nginx_instc_ctx.root.gid }}"
+    mode: "0644"
+  loop:
+    - nginx.conf
+    - nginx-http.conf
+  loop_control:
+    loop_var: filename
+    label: "{{ filename }}"
+
+- name: Deploy configurations - VHosts
+  ansible.builtin.template:
+    src: "templates/{{ item }}.j2"
+    dest: "{{ nginx_instc_ctx.dir.conf }}/conf.d/{{ item }}"
+    owner: "{{ nginx_instc_ctx.root.uid }}"
+    group: "{{ nginx_instc_ctx.root.gid }}"
+    mode: "0644"
+  loop:
+    - http-default.conf
+    - http-redirect_to_https.conf
+    - http-healthcheck.conf
+
+- name: Deploy instance TXT
+  ansible.builtin.copy:
+    dest: "{{ nginx_instc_ctx.dir.conf }}/instance.txt"
+    content: "name: {{ nginx_instance.name }}\nid: {{ nginx_instance.id }}\n"
+    owner: "{{ nginx_instc_ctx.root.uid }}"
+    group: "{{ nginx_instc_ctx.root.gid }}"
+    mode: "0644"

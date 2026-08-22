@@ -1,0 +1,4 @@
+- name: Load config - Instance
+  ansible.builtin.include_vars:
+    file: "{{ nginx_instance.config_file }}"
+    name: nginx_instc_config

@@ -1,0 +1,17 @@
+# Required
+http:
+  enabled_gzip: false # Default(true)
+  # Required
+  tls:
+    cert_file: cert.pem # Required
+    pkey_file: cert.key # Required
+
+# Required
+healthcheck:
+  address: "127.0.0.1" # Default('*')
+  names: ["healthcheck.myorg"] # Required
+  # Required
+  tls:
+    cert_file: cert.pem # Required
+    pkey_file: cert.key # Required
+  allowed_clients: ["192.168.0.0/24"] # Default(["127.0.0.0/8"])

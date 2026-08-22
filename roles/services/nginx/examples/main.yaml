@@ -1,0 +1,25 @@
+# Deployment
+
+## Native
+nginx_native_instance:
+  name: nginx-01 # Required
+  id: xxx-yyy # Required
+  config_file: /config.yaml # Required. Referenced by (nginx_instc_config)
+
+## Multi-instance - Container
+nginx_instances:
+  - deployment: {} # deployment_docker
+    # Too many "nginx_native_instance" properties
+
+# Deployments Type
+
+## Docker
+deployment_docker:
+  stack_name: nginx-stack # Required
+  fast_bootstrap: true # Default(false)
+  compose_file: docker-compose.yaml # Required
+  volumes:
+    conf: nginx-config # Required
+    data: nginx-data # Required
+    cache: nginx-cache # Required
+    logs: nginx-logs # Required

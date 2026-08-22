@@ -1,0 +1,8 @@
+- name: Install packages
+  ansible.builtin.dnf:
+    name:
+      - nginx
+      - nginx-mod-http-geoip
+      - nginx-mod-stream-geoip
+      - nginx-mod-http-image-filter
+    state: present

@@ -1,0 +1,22 @@
+# Nginx core file
+
+
+# Geral
+pid /run/nginx.pid;
+user {{ nginx_user.native.name if nginx_instc_ctx.deploy == 'native' else 'root' }};
+
+error_log {{ nginx_instc_ctx.dir.logs }}/nginx.error.log warn;
+lock_file {{ nginx_instc_ctx.dir.logs }}/nginx.lock;
+
+worker_processes auto;
+
+# Events
+events {
+    accept_mutex off;
+    worker_aio_requests 64;
+    worker_connections 256;
+}
+
+# Includes HTTP root configuration.
+include nginx-http.conf;
+

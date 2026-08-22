@@ -1,0 +1,13 @@
+- name: Set OS info
+  ansible.builtin.set_fact:
+    nginx_repo_os_family: "{{ ansible_facts.os_family | lower }}"
+
+- name: OS family support check
+  ansible.builtin.assert:
+    that: "nginx_repo_os_family in ['debian']"
+    success_msg: "Supported OS family."
+    fail_msg: "Unsupported OS family: {{ nginx_repo_os_family }}."
+    quiet: true
+
+- name: Include OS family tasks
+  ansible.builtin.include_tasks: "{{ nginx_repo_os_family }}.yaml"

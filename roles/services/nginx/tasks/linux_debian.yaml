@@ -1,0 +1,7 @@
+- name: Install packages
+  ansible.builtin.apt:
+    name:
+      - nginx
+      - nginx-module-geoip
+      - nginx-module-image-filter
+    state: present

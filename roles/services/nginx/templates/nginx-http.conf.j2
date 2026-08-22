@@ -1,0 +1,75 @@
+# HTTP root file
+
+
+http {
+    # Basic Settings
+    server_tokens off;
+    types_hash_max_size 4096;
+
+    # Connection
+    keepalive_requests 512;
+    keepalive_time 10m;
+    sendfile on;
+    sendfile_max_chunk 4m;
+    tcp_nopush on;
+
+    # SSL
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+    ssl_ciphers HIGH:!TLSv1.0:!SSLv3:!NULL:!aNULL:!MD5;
+    ssl_buffer_size 8k;
+
+    ssl_certificate {{ nginx_instc_config.http.tls.cert_file }};
+    ssl_certificate_key {{ nginx_instc_config.http.tls.pkey_file }};
+
+    # Request
+    ignore_invalid_headers on;
+    underscores_in_headers off;
+
+    large_client_header_buffers 8 16k;
+    client_header_timeout 30s;
+    client_header_buffer_size 2k;
+    client_body_timeout 60s;
+    client_body_buffer_size 16k;
+    client_max_body_size 2m;
+
+    # Response
+    etag on;
+    send_timeout 60s;
+
+    gzip {{ 'on' if nginx_instc_config.http.enabled_gzip | default(true) else 'off' }};
+    gzip_http_version 1.1;
+    gzip_min_length 1024;
+    gzip_comp_level 6;
+    gzip_buffers 32 8k;
+    gzip_proxied any;
+    gzip_vary off;
+    gzip_types
+        application/atom+xml
+        application/javascript
+        application/json
+        application/rss+xml
+        text/css
+        text/plain
+        text/xml;
+
+    # Mime Types
+    include mime.types;
+    default_type application/octet-stream;
+
+    # Default directory/file
+    root /var/www/html;
+    index index.html;
+
+    # Request limit
+    include snippets/http/request-limits.conf;
+
+    # Logging
+    include snippets/logging/http-formats.conf;
+    
+    access_log {{ nginx_instc_ctx.dir.logs }}/nginx.access.log {{ nginx_logging.access.format_name }} buffer={{ nginx_logging.access.buffer_size }} flush={{ nginx_logging.access.flush_time }};
+
+    # Include virtual servers HTTP
+    include conf.d/http-*.conf;
+}
+
