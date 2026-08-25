@@ -1,0 +1,5 @@
+pki_directory_user:
+  name: certificates
+  gid: 1024
+
+pki_directory_base_dir: /etc/certificates

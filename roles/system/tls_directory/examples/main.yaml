@@ -1,7 +1,0 @@
-# Required (All properties)
-tls_directory_system:
-  name: tls-cert
-  id: 1024
-
-# Required
-tls_directory_base_dir: /etc/ssl/custom

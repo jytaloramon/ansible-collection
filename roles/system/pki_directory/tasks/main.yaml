@@ -1,0 +1,49 @@
+- name: Set OS info
+  ansible.builtin.set_fact:
+    pki_directory_os_type: "{{ ansible_facts.system | lower }}"
+
+- name: OS type support check
+  ansible.builtin.assert:
+    that: pki_directory_os_type == 'linux'
+    success_msg: "Supported OS type."
+    fail_msg: "Unsupported OS type: {{ pki_directory_os_type }}."
+    quiet: true
+
+- name: Create system group
+  ansible.builtin.group:
+    name: "{{ pki_directory_user.name }}"
+    gid: "{{ pki_directory_user.gid }}"
+    system: true
+    state: present
+
+- name: Create base directory
+  ansible.builtin.file:
+    path: "{{ pki_directory_base_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Create archive directory
+  ansible.builtin.file:
+    path: "{{ pki_directory_base_dir }}/archive"
+    state: directory
+    owner: root
+    group: "{{ pki_directory_user.name }}"
+    mode: "0750"
+
+- name: Create live directory
+  ansible.builtin.file:
+    path: "{{ pki_directory_base_dir }}/live"
+    state: directory
+    owner: root
+    group: "{{ pki_directory_user.name }}"
+    mode: "0750"
+
+- name: Create CA directory
+  ansible.builtin.file:
+    path: "{{ pki_directory_base_dir }}/ca"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
