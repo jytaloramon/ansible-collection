@@ -1,0 +1,19 @@
+- name: Includes a task based on the OS family
+  when: locale_os_family in ['debian', 'redhat']
+  ansible.builtin.include_tasks: "linux_{{ locale_os_family }}.yaml"
+
+- name: Deploy locale configuration
+  ansible.builtin.template:
+    src: templates/locale.conf.j2
+    dest: /etc/locale.conf
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Deploy vconsole configuration
+  ansible.builtin.template:
+    src: templates/vconsole.conf.j2
+    dest: /etc/vconsole.conf
+    owner: root
+    group: root
+    mode: "0644"

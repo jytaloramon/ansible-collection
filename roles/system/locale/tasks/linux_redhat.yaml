@@ -1,0 +1,7 @@
+- name: Install langpack package
+  ansible.builtin.dnf:
+    name: "glibc-langpack-{{ pkg_suffix }}"
+  loop: "{{ locale_list | map('regex_replace', '_.*$', '') }}"
+  loop_control:
+    loop_var: pkg_suffix
+    label: "{{ pkg_suffix }}"

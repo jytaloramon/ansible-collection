@@ -1,0 +1,38 @@
+- name: Download Linux KBD Tools package
+  ansible.builtin.get_url:
+    url: "https://www.kernel.org/pub/linux/utils/kbd/kbd-{{ locale_kbd_pkg.version }}.tar.gz"
+    checksum: "{{ locale_kbd_pkg.hash }}"
+    decompress: false
+    dest: "/tmp/kbd-{{ locale_kbd_pkg.version }}.tar.gz"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Extract package Linux KBD Tools
+  ansible.builtin.unarchive:
+    src: "/tmp/kbd-{{ locale_kbd_pkg.version }}.tar.gz"
+    dest: /tmp
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Copy Keymaps
+  ansible.builtin.copy:
+    src: "/tmp/kbd-{{ locale_kbd_pkg.version }}/data/keymaps/"
+    dest: /usr/share/keymaps
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Fix file permissions - Keymaps
+  ansible.builtin.command:
+    chdir: /usr/share/keymaps
+    cmd: "find -type f -exec chmod 644 {} +"
+  changed_when: true
+
+- name: Enable locales
+  community.general.locale_gen:
+    name: "{{ locale_list }}"
+    state: present

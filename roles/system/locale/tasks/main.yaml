@@ -1,63 +1,14 @@
-- name: Configure locale
-  when: ansible_facts.system == "Linux"
-  block:
-    - name: Enable locales
-      community.general.locale_gen:
-        name: "{{ locale_locales }}"
-        state: present
+- name: Set OS info
+  ansible.builtin.set_fact:
+    locale_os_type: "{{ ansible_facts.system | lower }}"
+    locale_os_family: "{{ ansible_facts.os_family | lower }}"
 
-    - name: Deploy locale.conf file
-      ansible.builtin.template:
-        src: templates/locale.conf.j2
-        dest: /etc/locale.conf
-        owner: root
-        group: root
-        mode: "0644"
+- name: OS type support check
+  ansible.builtin.assert:
+    that: locale_os_type == 'linux'
+    success_msg: "Supported OS type."
+    fail_msg: "Unsupported OS type: {{ locale_os_type }}."
+    quiet: true
 
-    - name: Linux KBD Tools - Download package
-      ansible.builtin.get_url:
-        url: "https://www.kernel.org/pub/linux/utils/kbd/kbd-{{ locale_kbd_pkg.version }}.tar.gz"
-        checksum: "{{ locale_kbd_pkg.hash }}"
-        decompress: false
-        dest: "{{ locale_kbd_pkg.file }}"
-        owner: root
-        group: root
-        mode: "0755"
-
-    - name: Linux KBD Tools - Extract package
-      ansible.builtin.unarchive:
-        src: "{{ locale_kbd_pkg.file }}"
-        dest: "{{ locale_dir.tmp }}"
-        remote_src: true
-        owner: root
-        group: root
-        mode: "0755"
-
-    - name: Copy Keymaps
-      ansible.builtin.copy:
-        src: "{{ locale_dir.tmp }}/kbd-{{ locale_kbd_pkg.version }}/data/keymaps/"
-        dest: "{{ locale_dir.keymaps }}"
-        remote_src: true
-        owner: root
-        group: root
-        mode: "0755"
-
-    - name: Set directories permissions - Keymaps
-      ansible.builtin.command:
-        chdir: "{{ locale_dir.keymaps }}"
-        cmd: "find -type d -exec chmod 755 {} +"
-      changed_when: true
-
-    - name: Set file permissions - Keymaps
-      ansible.builtin.command:
-        chdir: "{{ locale_dir.keymaps }}"
-        cmd: "find -type f -exec chmod 644 {} +"
-      changed_when: true
-
-    - name: Deploy configuration file - vconsole.conf
-      ansible.builtin.template:
-        src: templates/vconsole.conf.j2
-        dest: /etc/vconsole.conf
-        owner: root
-        group: root
-        mode: "0644"
+- name: Include tasks based on the OS type
+  ansible.builtin.include_tasks: "{{ locale_os_type }}.yaml"
