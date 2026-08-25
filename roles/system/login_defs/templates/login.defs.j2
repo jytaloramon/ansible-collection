@@ -1,0 +1,63 @@
+# login.defs - shadow password suite configuration
+
+# Home dir
+CREATE_HOME yes
+HOME_MODE   0750
+NONEXISTENT /nonexistent
+
+# Env
+ENV_SUPATH PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV_PATH   PATH=/usr/local/bin:/usr/bin:/bin
+
+# Users and Groups
+CHFN_RESTRICT rwh
+USERGROUPS_ENAB yes
+
+## System users
+SYS_UID_MIN {{ login_defs_sys.uid.min }}
+SYS_UID_MAX {{ login_defs_sys.uid.max }}
+
+## Regular users
+UID_MIN {{ login_defs_regular.uid.min }}
+UID_MAX {{ login_defs_regular.uid.max }}
+
+## SubUID
+SUB_UID_MIN   {{ login_defs_sub.uid.min }}
+SUB_UID_MAX   {{ login_defs_sub.uid.max }}
+SUB_UID_COUNT {{ login_defs_sub.uid.count }}
+
+## System groups
+SYS_GID_MIN {{ login_defs_sys.gid.min }}
+SYS_GID_MAX {{ login_defs_sys.gid.max }}
+
+## Regular groups
+GID_MIN {{ login_defs_regular.gid.min }}
+GID_MAX {{ login_defs_regular.gid.max }}
+
+## SubGID
+SUB_GID_MIN   {{ login_defs_sub.gid.min }}
+SUB_GID_MAX   {{ login_defs_sub.gid.max }}
+SUB_GID_COUNT {{ login_defs_sub.gid.count }}
+
+# Login
+FAIL_DELAY    3
+LOGIN_RETRIES 5
+LOGIN_TIMEOUT 30
+
+HUSHLOGIN_FILE .hushlogin
+
+LOG_OK_LOGINS    no
+LOG_UNKFAIL_ENAB no
+
+# Pasword
+ENCRYPT_METHOD       YESCRYPT
+YESCRYPT_COST_FACTOR 9
+
+PASS_MIN_DAYS 0
+PASS_MAX_DAYS 99999
+PASS_WARN_AGE 14
+
+# Chars
+ERASECHAR 0177
+KILLCHAR  025
+

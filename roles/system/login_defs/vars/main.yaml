@@ -1,0 +1,25 @@
+login_defs_sys:
+  uid:
+    min: 101
+    max: 999
+  gid:
+    min: 101
+    max: 999
+
+login_defs_regular:
+  uid:
+    min: 1000
+    max: 60000
+  gid:
+    min: 1000
+    max: 60000
+
+login_defs_sub:
+  uid:
+    min: 100000
+    max: 600100000
+    count: 8192
+  gid:
+    min: 100000
+    max: 600100000
+    count: 8192

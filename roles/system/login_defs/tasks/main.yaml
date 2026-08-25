@@ -1,0 +1,18 @@
+- name: Set OS info
+  ansible.builtin.set_fact:
+    login_defs_os_type: "{{ ansible_facts.system | lower }}"
+
+- name: OS type support check
+  ansible.builtin.assert:
+    that: login_defs_os_type == 'linux'
+    success_msg: "Supported OS type."
+    fail_msg: "Unsupported OS type: {{ login_defs_os_type }}."
+    quiet: true
+
+- name: Deploy configuration
+  ansible.builtin.template:
+    src: templates/login.defs.j2
+    dest: /etc/login.defs
+    owner: root
+    group: root
+    mode: "0644"
