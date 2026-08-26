@@ -2,6 +2,6 @@ Types: deb
 URIs: https://download.docker.com/linux/{{ ansible_facts.distribution | lower }}
 Suites: {{ ansible_facts.distribution_release }}
 Components: stable
-Architectures: {{ docker_repo_dpkg_arch.stdout }}
+Architectures: {{ docker_repo_arch.stdout }}
 Signed-By: {{ docker_repo_gpgkey_file }}
 

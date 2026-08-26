@@ -1,13 +1,112 @@
 - name: Set OS family
   ansible.builtin.set_fact:
-    docker_repo_os_family: "{{ ansible_facts.os_family | lower }}"
+    docker_os_type: "{{ ansible_facts.system | lower }}"
+    docker_os_family: "{{ ansible_facts.os_family | lower }}"
 
-- name: OS support check
+- name: OS type support check
   ansible.builtin.assert:
-    that: "docker_repo_os_family in ['debian']"
-    success_msg: "Supported OS family."
-    fail_msg: "Unsupported OS family."
+    that: docker_os_type == 'linux'
+    success_msg: "Supported OS type."
+    fail_msg: "Unsupported OS type: {{ docker_os_type }}."
     quiet: true
 
-- name: Include OS family tasks
-  ansible.builtin.include_tasks: "{{ docker_repo_os_family }}.yaml"
+- name: OS family support check
+  ansible.builtin.assert:
+    that: "docker_os_family in ['debian', 'redhat']"
+    success_msg: "Supported OS family."
+    fail_msg: "Unsupported OS family: {{ docker_os_family }}."
+    quiet: true
+
+- name: Install packages
+  ansible.builtin.package:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+
+- name: Stop and disable service
+  ansible.builtin.service:
+    name: docker
+    state: stopped
+    enabled: false
+
+- name: Stop and disable socket
+  ansible.builtin.service:
+    name: docker.socket
+    state: stopped
+    enabled: false
+
+- name: Create system group
+  ansible.builtin.group:
+    name: "{{ grp.name }}"
+    gid: "{{ grp.gid }}"
+    system: true
+    state: present
+  loop:
+    - "{{ docker_user }}"
+    - "{{ docker_user_rootless }}"
+  loop_control:
+    loop_var: grp
+    label: "{{ grp.name }}"
+
+- name: Create system users
+  ansible.builtin.user:
+    name: "{{ docker_user_rootless.name }}"
+    uid: "{{ docker_user_rootless.uid }}"
+    password: "*"
+    group: "{{ docker_user_rootless.name }}"
+    groups: "{{ docker_user_rootless.groups }}"
+    create_home: false
+    home: /nonexistent
+    shell: "{{ docker_user_rootless.shell }}"
+    comment: "{{ docker_user_rootless.gecos }}"
+    system: true
+    state: present
+
+- name: Docker Rootless
+  when: docker_rootless | default(true)
+  block:
+    - name: Configure Rootless namespace - SubUID
+      ansible.builtin.lineinfile:
+        path: /etc/subuid
+        regexp: "^{{ docker_user_rootless.name }}:.+$"
+        line: "{{ docker_user_rootless.name }}:{{ docker_user_rootless.subuid.start }}:{{ docker_user_rootless.subuid.count }}"
+        state: present
+
+    - name: Configure Rootless namespace - SubGID
+      ansible.builtin.lineinfile:
+        path: /etc/subgid
+        regexp: "^{{ docker_user_rootless.name }}:.+$"
+        line: "{{ docker_user_rootless.name }}:{{ docker_user_rootless.subgid.start }}:{{ docker_user_rootless.subgid.count }}"
+        state: present
+
+- name: Create configuration directory
+  ansible.builtin.file:
+    path: /etc/docker
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy configuration
+  ansible.builtin.template:
+    src: templates/daemon.json.j2
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Start and enable socket
+  ansible.builtin.service:
+    name: docker.socket
+    state: started
+    enabled: true
+
+- name: Start and enable service
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true

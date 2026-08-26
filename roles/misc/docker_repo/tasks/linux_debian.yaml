@@ -1,23 +1,23 @@
-- name: Get DEB Architecture
+- name: Get Architecture
   ansible.builtin.command:
     cmd: dpkg --print-architecture
-  register: docker_repo_dpkg_arch
+  register: docker_repo_arch
   changed_when: false
 
-- name: Download Signing Key
+- name: Download GPG key
   ansible.builtin.get_url:
     url: "https://download.docker.com/linux/{{ ansible_facts.distribution | lower }}/gpg"
-    dest: "{{ docker_repo_tmp_dir }}/docker.gpg.asc"
+    dest: /tmp/docker.gpg.asc
     owner: root
     group: root
     mode: "0644"
 
-- name: Install Signing Key
+- name: Add GPG key
   ansible.builtin.command:
-    cmd: "gpg --dearmor --yes -o {{ docker_repo_gpgkey_file }} {{ docker_repo_tmp_dir }}/docker.gpg.asc"
+    cmd: "gpg --dearmor --yes -o {{ docker_repo_gpgkey_file }} /tmp/docker.gpg.asc"
   changed_when: true
 
-- name: Install APT repository
+- name: Add APT repository
   ansible.builtin.template:
     src: templates/apt.sources.j2
     dest: "/etc/apt/sources.list.d/docker.sources"

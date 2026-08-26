@@ -1,0 +1,4 @@
+- name: Add repository
+  ansible.builtin.command:
+    cmd: dnf config-manager addrepo --overwrite --from-repofile https://download.docker.com/linux/fedora/docker-ce.repo
+  changed_when: true

@@ -8,3 +8,10 @@
   ansible.builtin.set_fact:
     docker_facts_root_dir: "{{ docker_facts_info.stdout }}"
     cacheable: true
+
+- name: Get Docker Rootless namespace
+  when: docker_facts_root_dir is regex('/[0-9]+\\.[0-9]+$')
+  ansible.builtin.set_fact:
+    docker_facts_ns_base_uid: "{{ docker_facts_root_dir | regex_replace('^.*\\/([0-9]+)\\.([0-9]+)$', '\\1') }}"
+    docker_facts_ns_base_gid: "{{ docker_facts_root_dir | regex_replace('^.*\\/([0-9]+)\\.([0-9]+)$', '\\2') }}"
+    cacheable: true

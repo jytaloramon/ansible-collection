@@ -1,0 +1,17 @@
+docker_user:
+  name: docker
+  gid: 1024
+
+docker_user_rootless:
+  name: docker-remap
+  uid: 1025
+  gid: 1025
+  gecos: Docker Remap
+  shell: /usr/sbin/nologin
+  groups: []
+  subuid:
+    start: 500000
+    count: 65536
+  subgid:
+    start: 500000
+    count: 65536

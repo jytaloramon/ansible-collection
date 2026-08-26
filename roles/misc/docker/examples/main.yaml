@@ -1,27 +1,2 @@
 # Default(true)
 docker_rootless: false
-
-# Required (All properties)
-docker_system:
-  engine:
-    name: docker
-    id: 1024
-  namespace:
-    name: docker-remap
-    id: 1025
-    gecos: "Docker Remap"
-    shell: /usr/sbin/nologin
-    groups: []
-    map_uid:
-      start: 500000
-      limit: 30000
-    map_gid:
-      start: 500000
-      limit: 30000
-
-# Required (All properties)
-docker_dir:
-  conf: /etc/docker
-  data: /var/lib/docker
-  bin: /usr/local/bin
-  cron: /etc/cron.d

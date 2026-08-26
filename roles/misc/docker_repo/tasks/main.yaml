@@ -1,13 +1,21 @@
 - name: Set OS family
   ansible.builtin.set_fact:
+    docker_repo_os_type: "{{ ansible_facts.system | lower }}"
     docker_repo_os_family: "{{ ansible_facts.os_family | lower }}"
 
-- name: OS support check
+- name: OS type support check
   ansible.builtin.assert:
-    that: "docker_repo_os_family in ['debian']"
-    success_msg: "Supported OS family."
-    fail_msg: "Unsupported OS family."
+    that: docker_repo_os_type == 'linux'
+    success_msg: "Supported OS type."
+    fail_msg: "Unsupported OS type: {{ docker_repo_os_type }}."
     quiet: true
 
-- name: Include OS family tasks
-  ansible.builtin.include_tasks: "{{ docker_repo_os_family }}.yaml"
+- name: OS family support check
+  ansible.builtin.assert:
+    that: "docker_repo_os_family in ['debian', 'redhat']"
+    success_msg: "Supported OS family."
+    fail_msg: "Unsupported OS family: {{ docker_repo_os_family }}."
+    quiet: true
+
+- name: Includes a task based on the OS family
+  ansible.builtin.include_tasks: "{{ docker_repo_os_type }}_{{ docker_repo_os_family }}.yaml"

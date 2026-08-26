@@ -1,6 +1,6 @@
 {
 {% if docker_rootless | default(true) %}
-  "userns-remap": "{{ docker_system.namespace.name }}",
+  "userns-remap": "{{ docker_user_rootless.name }}",
 {% endif %}
   "default-ulimits": {
     "nofile": {
