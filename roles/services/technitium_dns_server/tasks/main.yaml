@@ -1,0 +1,10 @@
+- name: Native deployment
+  when: technitium_dns_server_native_instance is defined
+  ansible.builtin.include_tasks: deploy_native.yaml
+
+- name: Container deployment
+  ansible.builtin.include_tasks: deploy_container.yaml
+  loop: "{{ technitium_dns_server_instances | default([]) }}"
+  loop_control:
+    loop_var: technitium_dns_server_instc
+    label: "{{ technitium_dns_server_instc.name }}"

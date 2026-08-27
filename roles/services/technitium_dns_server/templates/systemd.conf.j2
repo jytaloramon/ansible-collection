@@ -1,0 +1,16 @@
+[Service]
+Environment=DNS_SERVER_LOG_FOLDER_PATH={{ technitium_dns_server_dir.logs }}
+
+User={{ technitium_dns_server_user.native.name }}
+Group={{ technitium_dns_server_user.native.name }}
+
+SyslogIdentifier={{ technitium_dns_server_identifier }}
+
+WorkingDirectory={{ technitium_dns_server_dir.app }}
+
+ReadWritePaths=
+ReadWritePaths={{ technitium_dns_server_dir.conf }} {{ technitium_dns_server_dir.logs }}
+
+ExecStart=
+ExecStart=/usr/bin/dotnet /opt/{{ technitium_dns_server_identifier }}/DnsServerApp.dll {{ technitium_dns_server_dir.conf }}
+

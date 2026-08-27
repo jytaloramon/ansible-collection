@@ -1,0 +1,23 @@
+technitium_dns_server_identifier: technitium-dns-server
+
+technitium_dns_server_user:
+  native:
+    name: technitium-dnss
+    uid: 1024
+    gid: 1024
+    gecos: Technitium DNS Server
+    shell: /usr/sbin/nologin
+    groups: []
+  container:
+    uid: 1025
+    gid: 1025
+
+technitium_dns_server_dir:
+  conf: "/etc/{{ technitium_dns_server_identifier }}"
+  data: "/var/lib/{{ technitium_dns_server_identifier }}"
+  logs: "/var/log/{{ technitium_dns_server_identifier }}"
+  app: "/opt/{{ technitium_dns_server_identifier }}"
+
+technitium_dns_server_pkg:
+  version: "15.4.0"
+  hash: sha256:461ac09d4304ace85093fc17b10a7ee13a8796eae0adb4393866bd4d66ab283f

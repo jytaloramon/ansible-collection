@@ -1,0 +1,14 @@
+- name: Create directories - Config, Data and Logs
+  ansible.builtin.file:
+    path: "{{ directory }}"
+    state: directory
+    owner: "{{ technitium_dns_server_instc_ctx.user.uid }}"
+    group: "{{ technitium_dns_server_instc_ctx.user.gid }}"
+    mode: "0750"
+  loop:
+    - "{{ technitium_dns_server_instc_ctx.dir.conf }}"
+    - "{{ technitium_dns_server_instc_ctx.dir.data }}"
+    - "{{ technitium_dns_server_instc_ctx.dir.logs }}"
+  loop_control:
+    loop_var: directory
+    label: "{{ directory }}"

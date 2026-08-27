@@ -1,0 +1,111 @@
+- name: Set OS family
+  ansible.builtin.set_fact:
+    technitium_dns_server_os_type: "{{ ansible_facts.system | lower }}"
+
+- name: OS type support check
+  ansible.builtin.assert:
+    that: technitium_dns_server_os_type == 'linux'
+    success_msg: "Supported OS type."
+    fail_msg: "Unsupported OS type: {{ technitium_dns_server_os_type }}."
+    quiet: true
+
+- name: Set instance context
+  ansible.builtin.set_fact:
+    technitium_dns_server_instc: "{{ technitium_dns_server_native_instance }}"
+    technitium_dns_server_instc_ctx:
+      dir:
+        conf: "{{ technitium_dns_server_dir.conf }}"
+        data: "{{ technitium_dns_server_dir.data }}"
+        logs: "{{ technitium_dns_server_dir.logs }}"
+      user:
+        uid: "{{ technitium_dns_server_user.native.uid }}"
+        gid: "{{ technitium_dns_server_user.native.gid }}"
+
+- name: Download package
+  ansible.builtin.get_url:
+    url: "https://download.technitium.com/dns/archive/{{
+      technitium_dns_server_pkg.version }}/DnsServerPortable.tar.gz"
+    checksum: "{{ technitium_dns_server_pkg.hash }}"
+    decompress: false
+    dest: "/tmp/{{ technitium_dns_server_identifier }}.tar.gz"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Create system group
+  ansible.builtin.group:
+    name: "{{ technitium_dns_server_user.native.name }}"
+    gid: "{{ technitium_dns_server_user.native.gid }}"
+    system: true
+    state: present
+
+- name: Create system users
+  ansible.builtin.user:
+    name: "{{ technitium_dns_server_user.native.name }}"
+    uid: "{{ technitium_dns_server_user.native.uid }}"
+    password: "*"
+    group: "{{ technitium_dns_server_user.native.name }}"
+    groups: "{{ technitium_dns_server_user.native.groups }}"
+    create_home: false
+    home: "{{ technitium_dns_server_dir.data }}"
+    shell: "{{ technitium_dns_server_user.native.shell }}"
+    comment: "{{ technitium_dns_server_user.native.gecos }}"
+    system: true
+    state: present
+
+- name: Create Application directory
+  ansible.builtin.file:
+    path: "{{ technitium_dns_server_dir.app }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Extract package
+  ansible.builtin.unarchive:
+    src: "/tmp/{{ technitium_dns_server_identifier }}.tar.gz"
+    dest: "{{ technitium_dns_server_dir.app }}"
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Fix application file permissions
+  ansible.builtin.shell:
+    chdir: "/opt/{{ technitium_dns_server_identifier }}"
+    cmd: find -type f -exec chmod 644 {} +
+  changed_when: true
+
+- name: Deploy Systemd service
+  ansible.builtin.copy:
+    src: "/opt/{{ technitium_dns_server_identifier }}/systemd.service"
+    dest: "/etc/systemd/system/{{ technitium_dns_server_identifier }}.service"
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Create Systemd directory - Override
+  ansible.builtin.file:
+    path: "/etc/systemd/system/{{ technitium_dns_server_identifier }}.service.d"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy Systemd service - Override
+  ansible.builtin.template:
+    src: templates/systemd.conf.j2
+    dest: "/etc/systemd/system/{{ technitium_dns_server_identifier }}.service.d/override.conf"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Includes shared tasks
+  ansible.builtin.import_tasks: deploy_shared_core.yaml
+
+- name: Start service
+  ansible.builtin.service:
+    name: "{{ technitium_dns_server_identifier }}"
+    state: started
+    enabled: true

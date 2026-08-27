@@ -1,0 +1,17 @@
+# Native deployment
+technitium_dns_server_native_instance:
+  name: dns-01 # Required
+
+# Container/Multi-instance deployment
+technitium_dns_server_instances:
+  - deployment: {} # Required. Options: deployment_docker.
+    # And "technitium_dns_server_native_instance" properties
+
+# Deployments container type - Docker
+deployment_docker:
+  stack_name: technitium-stack # Required
+  compose_file: docker-compose.yaml # Required
+  volumes: # Required
+    conf: technitium-config # Required
+    data: technitium-data # Required
+    logs: technitium-logs # Required

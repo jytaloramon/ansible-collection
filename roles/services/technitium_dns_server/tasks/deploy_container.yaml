@@ -1,0 +1,43 @@
+- name: Set instance context
+  ansible.builtin.set_fact:
+    technitium_dns_server_instc_ctx:
+      dir:
+        conf: "{{ docker_facts_root_dir }}/volumes/{{ technitium_dns_server_instc.deployment.volumes.conf }}/_data"
+        data: "{{ docker_facts_root_dir }}/volumes/{{ technitium_dns_server_instc.deployment.volumes.data }}/_data"
+        logs: "{{ docker_facts_root_dir }}/volumes/{{ technitium_dns_server_instc.deployment.volumes.logs }}/_data"
+      user:
+        uid: "{{ (docker_facts_ns_base_uid | default(0)) + technitium_dns_server_user.container.uid }}"
+        gid: "{{ (docker_facts_ns_base_gid | default(0)) + technitium_dns_server_user.container.gid }}"
+
+- name: Create container volumes
+  community.docker.docker_volume:
+    volume_name: "{{ vol_name }}"
+    driver: local
+  loop:
+    - "{{ technitium_dns_server_instc.deployment.volumes.conf }}"
+    - "{{ technitium_dns_server_instc.deployment.volumes.data }}"
+    - "{{ technitium_dns_server_instc.deployment.volumes.logs }}"
+  loop_control:
+    loop_var: vol_name
+    label: "{{ vol_name }}"
+
+- name: Includes shared tasks
+  ansible.builtin.import_tasks: deploy_shared_core.yaml
+
+- name: Deploy compose file
+  ansible.builtin.template:
+    src: "{{ technitium_dns_server_instc.deployment.compose_file }}"
+    dest: "/tmp/{{ technitium_dns_server_instc.deployment.stack_name }}.docker-compose.yaml"
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Deploy Stack - Docker
+  community.docker.docker_stack:
+    name: "{{ technitium_dns_server_instc.deployment.stack_name }}"
+    compose: "/tmp/{{ technitium_dns_server_instc.deployment.stack_name }}.docker-compose.yaml"
+
+- name: Remove Compose file
+  ansible.builtin.file:
+    path: "/tmp/{{ technitium_dns_server_instc.deployment.stack_name }}.docker-compose.yaml"
+    state: absent
