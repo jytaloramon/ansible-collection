@@ -1,9 +1,0 @@
-# Required (All properties)
-zellij_terminal_wrkspace_pkg:
-  version: "0.44.3"
-  variant: zellij-no-web-x86_64-unknown-linux-musl.tar.gz
-  hash: sha256:f901129919b0a405ac5f278f53acd7fde5d62401324c509b6233038d5c0ad1f9
-  file: "/tmp/zellij.tar.gz"
-
-# Required
-zellij_terminal_wrkspace_bin_dir: /usr/local/bin

@@ -1,0 +1,6 @@
+zellij_terminal_wrkspace_bin_dir: /usr/local/bin
+
+zellij_terminal_wrkspace_pkg:
+  version: "0.45.0"
+  variant: zellij-no-web-x86_64-unknown-linux-musl.tar.gz
+  hash: sha256:2d793377c788300256f18fa17ab251e444ba28db07b0959aca5902834c0f7efd

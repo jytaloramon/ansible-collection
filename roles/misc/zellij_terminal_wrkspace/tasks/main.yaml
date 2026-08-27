@@ -1,22 +1,30 @@
-- name: Install and configure
-  when: ansible_facts.system == "Linux"
-  block:
-    - name: Download package
-      ansible.builtin.get_url:
-        url: "https://github.com/zellij-org/zellij/releases/download/v{{
-          zellij_terminal_wrkspace_pkg.version }}/{{ zellij_terminal_wrkspace_pkg.variant }}"
-        checksum: "{{ zellij_terminal_wrkspace_pkg.hash }}"
-        decompress: false
-        dest: "{{ zellij_terminal_wrkspace_pkg.file }}"
-        owner: root
-        group: root
-        mode: "0755"
+- name: Set OS facts
+  ansible.builtin.set_fact:
+    zellij_terminal_wrkspace_os_type: "{{ ansible_facts.system | lower }}"
 
-    - name: Extract package
-      ansible.builtin.unarchive:
-        src: "{{ zellij_terminal_wrkspace_pkg.file }}"
-        dest: "{{ zellij_terminal_wrkspace_bin_dir }}"
-        remote_src: true
-        owner: root
-        group: root
-        mode: "0755"
+- name: OS type support check
+  ansible.builtin.assert:
+    that: zellij_terminal_wrkspace_os_type == 'linux'
+    success_msg: "Supported OS type."
+    fail_msg: "Unsupported OS type: {{ zellij_terminal_wrkspace_os_type }}."
+    quiet: true
+
+- name: Download Zellij
+  ansible.builtin.get_url:
+    url: "https://github.com/zellij-org/zellij/releases/download/v{{
+      zellij_terminal_wrkspace_pkg.version }}/{{ zellij_terminal_wrkspace_pkg.variant }}"
+    checksum: "{{ zellij_terminal_wrkspace_pkg.hash }}"
+    decompress: false
+    dest: /tmp/zellij.tar.gz
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Extract package
+  ansible.builtin.unarchive:
+    src: /tmp/zellij.tar.gz
+    dest: "{{ zellij_terminal_wrkspace_bin_dir }}"
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0755"
