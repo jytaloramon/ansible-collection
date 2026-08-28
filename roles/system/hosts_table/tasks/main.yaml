@@ -1,15 +1,21 @@
-- name: Configure static table
-  when: ansible_facts.system == "Linux"
-  block:
-    - name: Set Cloud-init file
-      when: hosts_table_cloud_init | default(false)
-      ansible.builtin.set_fact:
-        hosts_table_cloud_init_file: "/etc/cloud/templates/hosts.{{ ansible_facts.os_family | lower }}.tmpl"
+- name: Set OS facts
+  ansible.builtin.set_fact:
+    hosts_table_os_type: "{{ ansible_facts.system | lower }}"
 
-    - name: Set static table lookup for hostnames
-      ansible.builtin.template:
-        src: templates/hosts.j2
-        dest: "{{ hosts_table_cloud_init_file | default('/etc/hosts') }}"
-        owner: root
-        group: root
-        mode: "0644"
+- name: OS type support check
+  ansible.builtin.assert:
+    that: hosts_table_os_type == 'linux'
+    success_msg: "Supported OS type."
+    fail_msg: "Unsupported OS type: {{ hosts_table_os_type }}."
+    quiet: true
+
+- name: Set static table lookup for hostnames
+  ansible.builtin.template:
+    src: templates/hosts.j2
+    dest:
+      "{{ '/etc/cloud/templates/hosts.{}.tmpl'.format(ansible_facts.os_family | lower)
+      if hosts_table_cloud_init | default(false)
+      else '/etc/hosts' }}"
+    owner: root
+    group: root
+    mode: "0644"
