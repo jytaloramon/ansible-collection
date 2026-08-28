@@ -1,4 +1,4 @@
-{% if hosts_table_cloud_init_file is defined %}
+{% if hosts_table_cloud_init | default(false) %}
 ## template: jinja
 {% endif %}
 # Static table lookup for hostnames
