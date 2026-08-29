@@ -1,3 +1,7 @@
+- name: Set locale facts
+  ansible.builtin.set_fact:
+    locale_alt_kbd_file: /etc/default/keyboard
+
 - name: Download Linux KBD Tools package
   ansible.builtin.get_url:
     url: "https://www.kernel.org/pub/linux/utils/kbd/kbd-{{ locale_kbd_pkg.version }}.tar.gz"

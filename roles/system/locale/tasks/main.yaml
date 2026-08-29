@@ -10,5 +10,22 @@
     fail_msg: "Unsupported OS type: {{ locale_os_type }}."
     quiet: true
 
-- name: Include tasks based on the OS type
-  ansible.builtin.include_tasks: "{{ locale_os_type }}.yaml"
+- name: Includes a task based on the OS family
+  when: locale_os_family in ['debian', 'redhat']
+  ansible.builtin.include_tasks: "linux_{{ locale_os_family }}.yaml"
+
+- name: Deploy locale configuration
+  ansible.builtin.template:
+    src: templates/locale.conf.j2
+    dest: /etc/locale.conf
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Deploy KBD configuration
+  ansible.builtin.template:
+    src: templates/keyboard.conf.j2
+    dest: "{{ locale_alt_kbd_file | default('/etc/vconsole.conf') }}"
+    owner: root
+    group: root
+    mode: "0644"
