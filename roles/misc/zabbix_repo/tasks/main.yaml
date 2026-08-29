@@ -1,2 +1,41 @@
-- name: Import OS-specific tasks
-  ansible.builtin.include_tasks: "{{ ansible_facts.os_family | lower }}.yaml"
+- name: Set OS facts
+  ansible.builtin.set_fact:
+    zabbix_repo_os_type: "{{ ansible_facts.system | lower }}"
+    zabbix_repo_os_family: "{{ ansible_facts.os_family | lower }}"
+    zabbix_repo_distribution: "{{ ansible_facts.distribution | lower }}"
+
+- name: OS type support check
+  ansible.builtin.assert:
+    that: zabbix_repo_os_type == 'linux'
+    success_msg: "Supported OS type."
+    fail_msg: "Unsupported OS type: {{ zabbix_repo_os_type }}."
+    quiet: true
+
+- name: OS family support check
+  ansible.builtin.assert:
+    that: zabbix_repo_os_family == 'debian'
+    success_msg: "Supported OS family."
+    fail_msg: "Unsupported OS family: {{ zabbix_repo_os_family }}."
+    quiet: true
+
+- name: Download package
+  ansible.builtin.get_url:
+    url: "https://repo.zabbix.com/zabbix/{{ zabbix_repo_pkg.version }}/{{
+      zabbix_repo_distribution }}/pool/main/z/zabbix-release/zabbix-release_latest_{{
+      zabbix_repo_pkg.version }}+{{ zabbix_repo_distribution }}{{
+      ansible_facts.distribution_major_version
+      if zabbix_repo_distribution == 'debian'
+      else ansible_facts.distribution_version }}_all.deb"
+    dest: /tmp/zabbix-repo.deb
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install package
+  ansible.builtin.command:
+    cmd: dpkg -i /tmp/zabbix-repo.deb
+  changed_when: true
+
+- name: Synchronize APT package information
+  ansible.builtin.apt:
+    update_cache: true
