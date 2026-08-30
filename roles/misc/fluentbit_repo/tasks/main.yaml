@@ -1,13 +1,44 @@
-- name: Set OS family
+- name: Set OS facts
   ansible.builtin.set_fact:
+    fluentbit_repo_os_type: "{{ ansible_facts.system | lower }}"
     fluentbit_repo_os_family: "{{ ansible_facts.os_family | lower }}"
+    fluentbit_repo_dist_release: "{{ ansible_facts.distribution_release }}"
 
-- name: OS support check
+- name: OS type support check
   ansible.builtin.assert:
-    that: "fluentbit_repo_os_family in ['debian']"
-    success_msg: "Supported OS family."
-    fail_msg: "Unsupported OS family."
+    that: fluentbit_repo_os_type == 'linux'
+    success_msg: "Supported OS type."
+    fail_msg: "Unsupported OS type: {{ fluentbit_repo_os_type }}."
     quiet: true
 
-- name: Include OS family tasks
-  ansible.builtin.include_tasks: "{{ fluentbit_repo_os_family }}.yaml"
+- name: OS family support check
+  ansible.builtin.assert:
+    that: fluentbit_repo_os_family == 'debian'
+    success_msg: "Supported OS family."
+    fail_msg: "Unsupported OS family: {{ fluentbit_repo_os_family }}."
+    quiet: true
+
+- name: Download GPG key
+  ansible.builtin.get_url:
+    url: https://packages.fluentbit.io/fluentbit.key
+    dest: /tmp/fluentbit.gpg.asc
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Add GPG key
+  ansible.builtin.command:
+    cmd: "gpg --dearmor --yes -o {{ fluentbit_repo_gpgkey_file }} /tmp/fluentbit.gpg.asc"
+  changed_when: true
+
+- name: Add APT repository
+  ansible.builtin.template:
+    src: templates/apt.sources.j2
+    dest: /etc/apt/sources.list.d/fluent-bit.sources
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Synchronize APT package information
+  ansible.builtin.apt:
+    update_cache: true

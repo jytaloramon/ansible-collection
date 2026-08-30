@@ -1,5 +1,1 @@
-# Required
 fluentbit_repo_gpgkey_file: /usr/share/keyrings/fluentbit-keyring.gpg
-
-# Required
-fluentbit_repo_tmp_dir: /tmp
