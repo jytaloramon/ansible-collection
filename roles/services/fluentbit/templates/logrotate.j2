@@ -1,14 +1,14 @@
 # Fluent Bit - logrotate
 
 {{ fluentbit_dir.logs }}/*.log {
-  {{ fluentbit_logrotate.frequency }}
-  rotate {{ fluentbit_logrotate.count }}
-  maxage {{ fluentbit_logrotate.max_age }}
+  daily
+  rotate 200
+  maxage 200
   missingok
   notifempty
   nocreate
   dateext
-  dateformat {{ fluentbit_logrotate.date_format }}
+  dateformat -%Y%m%d
   compress
   delaycompress
   sharedscripts

@@ -1,18 +1,3 @@
 fluentbit_config:
   config_file: config.yaml # Referenced by (fluentbit_instc_config). See: config.yaml.
   vault_file: vault.yaml # Referenced by (fluentbit_instc_vault)
-
-# Required (All properties)
-fluentbit_dir:
-  conf: /etc/fluent-bit
-  data: /var/lib/fluent-bit
-  logs: /var/log/fluent-bit
-  systemd_service: /etc/systemd/system/fluent-bit.service.d
-
-# Required (All properties)
-fluentbit_logrotate:
-  frequency: daily
-  count: 200
-  max_age: 200
-  date_format: "-%Y%m%d"
-  file: /etc/logrotate.d/fluent-bit

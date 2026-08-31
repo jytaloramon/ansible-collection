@@ -1,25 +1,119 @@
-- name: Set OS family
+- name: Set OS facts
   ansible.builtin.set_fact:
+    fluentbit_os_type: "{{ ansible_facts.system | lower }}"
     fluentbit_os_family: "{{ ansible_facts.os_family | lower }}"
 
-- name: OS support check
+- name: OS type support check
   ansible.builtin.assert:
-    that: "fluentbit_os_family in ['debian']"
-    success_msg: "Supported OS family."
-    fail_msg: "Unsupported OS family."
+    that: fluentbit_os_type == 'linux'
+    success_msg: "Supported OS type."
+    fail_msg: "Unsupported OS type: {{ fluentbit_os_type }}."
     quiet: true
 
-- name: Load Vault
-  when: fluentbit_config.vault_file is defined
-  ansible.builtin.include_vars:
-    file: "{{ fluentbit_config.vault_file }}"
-    name: fluentbit_instc_vault
+- name: OS family support check
+  ansible.builtin.assert:
+    that: fluentbit_os_family == 'debian'
+    success_msg: "Supported OS family."
+    fail_msg: "Unsupported OS family: {{ fluentbit_os_family }}."
+    quiet: true
 
-- name: Load config
-  when: fluentbit_config.config_file is defined
-  ansible.builtin.include_vars:
-    file: "{{ fluentbit_config.config_file }}"
-    name: fluentbit_instc_config
+- name: Install package
+  ansible.builtin.apt:
+    name: fluent-bit
+    state: present
 
-- name: Include OS family tasks
-  ansible.builtin.include_tasks: "{{ fluentbit_os_family }}.yaml"
+- name: Stop and disable service
+  ansible.builtin.service:
+    name: fluent-bit
+    state: stopped
+    enabled: false
+
+- name: Remove classic configurations files
+  ansible.builtin.file:
+    path: "{{ fluentbit_dir.conf }}/{{ filename }}"
+    state: absent
+  loop:
+    - fluent-bit.conf
+    - parsers.conf
+    - plugins.conf
+  loop_control:
+    loop_var: filename
+    label: "{{ filename }}"
+
+- name: Copy base configuration
+  ansible.builtin.copy:
+    src: files/
+    dest: "{{ fluentbit_dir.conf }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Deploy configuration - fluent-bit
+  ansible.builtin.template:
+    src: "templates/fluent-bit.yaml.j2"
+    dest: "{{ fluentbit_dir.conf }}/fluent-bit.yaml"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Deploy configuration - Filters
+  ansible.builtin.template:
+    src: "templates/filters.yaml.j2"
+    dest: "{{ fluentbit_dir.conf }}/filters.yaml"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Deploy configuration - Output
+  ansible.builtin.template:
+    src: "templates/outputs.yaml.j2"
+    dest: "{{ fluentbit_dir.conf }}/outputs.yaml"
+    owner: root
+    group: root
+    mode: "0640"
+
+- name: Create directory
+  ansible.builtin.file:
+    path: "{{ directory }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+  loop:
+    - "{{ fluentbit_dir.conf }}/inputs"
+    - "{{ fluentbit_dir.data }}/storage"
+    - "{{ fluentbit_dir.logs }}"
+    - "{{ fluentbit_dir.logs }}/dead-letter"
+  loop_control:
+    loop_var: directory
+    label: "{{ directory }}"
+
+- name: Create Systemd directory - Override
+  ansible.builtin.file:
+    path: /etc/systemd/system/fluent-bit.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy Systemd service - Override
+  ansible.builtin.template:
+    src: templates/systemd.conf.j2
+    dest: /etc/systemd/system/fluent-bit.service.d/override.conf
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Deploy logrotate configuration
+  ansible.builtin.template:
+    src: templates/logrotate.j2
+    dest: /etc/logrotate.d/fluent-bit
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Start and enable service
+  ansible.builtin.service:
+    name: fluent-bit
+    state: started
+    enabled: true
