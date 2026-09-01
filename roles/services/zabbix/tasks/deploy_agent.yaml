@@ -1,0 +1,85 @@
+- name: Set OS facts
+  ansible.builtin.set_fact:
+    zabbix_os_type: "{{ ansible_facts.system | lower }}"
+    zabbix_os_family: "{{ ansible_facts.os_family | lower }}"
+
+- name: OS type support check
+  ansible.builtin.assert:
+    that: zabbix_os_type == 'linux'
+    success_msg: "Supported OS type."
+    fail_msg: "Unsupported OS type: {{ zabbix_os_type }}."
+    quiet: true
+
+- name: OS family support check
+  ansible.builtin.assert:
+    that: zabbix_os_family == 'debian'
+    success_msg: "Supported OS family."
+    fail_msg: "Unsupported OS family: {{ zabbix_os_family }}."
+    quiet: true
+
+
+
+
+
+
+
+# - name: Instance Load - Config
+#   ansible.builtin.include_vars:
+#     file: "{{ zabbix_agent.config_file }}"
+#     name: zabbix_agent_config
+
+# - name: Install packages
+#   ansible.builtin.apt:
+#     name: zabbix-agent2
+#     state: present
+
+# - name: Import OS-specific tasks
+#   ansible.builtin.include_tasks: "agent_{{ ansible_facts.os_family | lower }}.yaml"
+
+# - name: Stop and disable service
+#   ansible.builtin.service:
+#     name: zabbix-agent2
+#     state: stopped
+#     enabled: false
+
+# - name: Install shared core
+#   ansible.builtin.import_tasks: install_shared_core.yaml
+
+# - name: Create directory - Scripts
+#   ansible.builtin.file:
+#     path: "{{ zabbix_agent_scripts_dir }}"
+#     state: directory
+#     owner: root
+#     group: root
+#     mode: "0755"
+
+# - name: Deploy zabbix_agent2.conf file
+#   ansible.builtin.template:
+#     src: templates/zabbix_agent2.conf.j2
+#     dest: "{{ zabbix_dir.conf }}/zabbix_agent2.conf"
+#     owner: root
+#     group: "{{ zabbix_system.name }}"
+#     mode: "0640"
+
+# - name: Create PSK file
+#   when: zabbix_agent_config.connection.psk is defined
+#   ansible.builtin.copy:
+#     dest: "{{ zabbix_dir.conf }}/{{ zabbix_agent_config.connection.psk.key_filename }}"
+#     content: "{{ zabbix_agent_config.connection.psk.key }}"
+#     owner: "root"
+#     group: "{{ zabbix_system.name }}"
+#     mode: "0640"
+
+# - name: Deploy logrotate configuration
+#   ansible.builtin.template:
+#     src: templates/zabbix_agent2.logrotate.j2
+#     dest: "{{ zabbix_logrotate.file.agent }}"
+#     owner: root
+#     group: root
+#     mode: "0644"
+
+# - name: Start and enable service
+#   ansible.builtin.service:
+#     name: zabbix-agent2
+#     state: started
+#     enabled: true
