@@ -66,6 +66,19 @@
     group: "{{ zabbix_user.name }}"
     mode: "0640"
 
+- name: Remove rotate log configuration
+  ansible.builtin.file:
+    path: /etc/logrotate.d/zabbix-agent2
+    state: absent
+
+- name: Deploy configuration - Rotate log files
+  ansible.builtin.template:
+    src: templates/agent/logrotate.j2
+    dest: "/etc/logrotate.d/zabbix-agent"
+    owner: root
+    group: root
+    mode: "0644"
+
 - name: Start and enable service
   ansible.builtin.service:
     name: zabbix-agent2

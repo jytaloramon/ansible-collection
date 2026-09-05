@@ -1,0 +1,22 @@
+# Zabbix Agent - logrotate
+
+{{ zabbix_dir.logs }}/zabbix-agent2.log {
+  daily
+  missingok
+  notifempty
+  maxage 210
+  create 0640 {{ zabbix_user.name }} {{ zabbix_user.name }}
+  compress
+  delaycompress
+  dateext
+  dateformat -%Y%m%d
+  sharedscripts
+
+{% set pid_file = '{}/zabbix_agent2.pid'.format(zabbix_dir.run) %}
+  postrotate
+    if [ -f {{ pid_file }} ]; then
+      kill -HUP `cat {{ pid_file }}`
+    fi
+  endscript
+}
+
