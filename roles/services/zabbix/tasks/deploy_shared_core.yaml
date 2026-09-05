@@ -1,0 +1,42 @@
+- name: Create system group
+  ansible.builtin.group:
+    name: "{{ zabbix_user.name }}"
+    gid: "{{ zabbix_user.gid }}"
+    system: true
+    state: present
+
+- name: Create system user
+  ansible.builtin.user:
+    name: "{{ zabbix_user.name }}"
+    uid: "{{ zabbix_user.uid }}"
+    password: "*"
+    group: "{{ zabbix_user.name }}"
+    groups: "{{ zabbix_user.groups }}"
+    create_home: false
+    home: "{{ zabbix_dir.data }}"
+    shell: "{{ zabbix_user.shell }}"
+    comment: "{{ zabbix_user.gecos }}"
+    system: true
+    state: present
+
+- name: Create config directory
+  ansible.builtin.file:
+    path: "{{ zabbix_dir.conf }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Create additional directories
+  ansible.builtin.file:
+    path: "{{ directory }}"
+    state: directory
+    owner: "{{ zabbix_user.name }}"
+    group: "{{ zabbix_user.name }}"
+    mode: "0750"
+  loop:
+    - "{{ zabbix_dir.data }}"
+    - "{{ zabbix_dir.logs }}"
+  loop_control:
+    loop_var: directory
+    label: "{{ directory }}"

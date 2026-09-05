@@ -1,0 +1,98 @@
+# Zabbix Agent 2 configuration file
+
+# Core
+PidFile={{ zabbix_dir.run }}/zabbix_agent2.pid
+
+{% if zabbix_agent_instc_config.hostnames | default([]) %}
+Hostname={{ zabbix_agent_instc_config.hostnames | join(',') }}
+{% endif %}
+HostnameItem=system.hostname
+
+ControlSocket={{ zabbix_dir.run }}/agent.sock
+PluginSocket={{ zabbix_dir.run }}/agent.plugin.sock
+
+UnsafeUserParameters=0
+UserParameterDir={{ zabbix_dir.agent.scripts }}
+
+# Mode
+{% if zabbix_agent_instc_config.active_mode is defined %}
+
+## Active
+ServerActive={{ zabbix_agent_instc_config.active_mode.servers | join(',') }}
+
+TLSConnect={{ zabbix_agent_instc_config.active_mode.tls_connect | default('cert') }}
+
+ForceActiveChecksOnStart=0
+RefreshActiveChecks=30
+
+HeartbeatFrequency=60
+{% endif %}
+{%if zabbix_agent_instc_config.passive_mode is defined %}
+
+## Passive
+Server={{ zabbix_agent_instc_config.passive_mode.allowed_servers | join(',') }}
+TLSAccept={{ zabbix_agent_instc_config.passive_mode.tls_accept | default(['cert']) | join(',') }}
+{% endif %}
+
+# Zabbix Trapper / Status
+ListenIP=0.0.0.0
+ListenPort={{ zabbix_agent_instc_config.port | default(10050) }}
+{% if zabbix_agent_instc_config.status_port is defined %}
+
+StatusPort={{ zabbix_agent_instc_config.status_port }}
+{% endif %}
+
+# Buffer
+BufferSend=60
+BufferSize=1000
+
+EnablePersistentBuffer=0
+PersistentBufferFile={{ zabbix_dir.data }}/zabbix-agent2.db
+PersistentBufferPeriod=2h
+
+# Connection
+Timeout=10
+PluginTimeout=15
+
+# Logging
+LogType=file
+DebugLevel={{ zabbix_agent_instc_config.log_level | default(3) }}
+
+LogFile={{ zabbix_dir.logs }}/zabbix-agent2.log
+LogFileSize=0
+
+Plugins.Log.MaxLinesPerSecond=20
+Plugins.SystemRun.LogRemoteCommands=0
+
+# Communication
+{% if zabbix_agent_instc_config.connection.psk is defined %}
+
+## PSK
+TLSPSKIdentity={{ zabbix_agent_instc_config.connection.psk.name }}
+TLSPSKFile={{ zabbix_agent_instc_config.connection.psk.key_file }}
+{% endif %}
+{% if zabbix_agent_instc_config.connection.tls is defined %}
+
+## TLS
+TLSCAFile={{ zabbix_agent_instc_config.connection.tls.ca_file }}
+{% if zabbix_agent_instc_config.connection.tls.crl_file is defined %}
+TLSCRLFile={{ zabbix_agent_instc_config.connection.tls.crl_file }}
+{% endif %}
+TLSCertFile={{ zabbix_agent_instc_config.connection.tls.cert_file }}
+TLSKeyFile={{ zabbix_agent_instc_config.connection.tls.pkey_file }}
+{% if zabbix_agent_instc_config.connection.tls.server_subject is defined %}
+TLSServerCertSubject={{ zabbix_agent_instc_config.connection.tls.server_subject }}
+{% endif %}
+{% if zabbix_agent_instc_config.connection.tls.server_issuer is defined %}
+TLSServerCertIssuer={{ zabbix_agent_instc_config.connection.tls.server_issuer }}
+{% endif %}
+{% endif %}
+
+## Ciphers
+TLSCipherAll=ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-PSK-CHACHA20-POLY1305:ECDHE-PSK-AES256-GCM-SHA384:ECDHE-PSK-AES128-GCM-SHA256
+TLSCipherAll13=TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256
+
+# Include configuration files
+Include={{ zabbix_dir.conf }}/zabbix_agent2.d/*.conf
+Include={{ zabbix_dir.conf }}/zabbix_agent2.d/plugins.d/*.conf
+

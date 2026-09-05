@@ -1,0 +1,19 @@
+zabbix_user:
+  name: zabbix
+  uid: 1024
+  gid: 1024
+  gecos: Zabbix
+  shell: /usr/sbin/nologin
+  groups: []
+
+zabbix_dir:
+  conf: /etc/zabbix
+  data: /var/lib/zabbix
+  logs: /var/log/zabbix
+  run: /run/zabbix
+  # server:
+  #   scripts: /usr/lib/zabbix/externalscripts
+  #   alert_scripts: /usr/lib/zabbix/alertscripts
+  #   tmp: /tmp
+  agent:
+    scripts: /usr/lib/zabbix/agent-scripts

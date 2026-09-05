@@ -37,44 +37,37 @@
     name: zabbix-agent2
     state: stopped
     enabled: false
-# - name: Install shared core
-#   ansible.builtin.import_tasks: install_shared_core.yaml
 
-# - name: Create directory - Scripts
-#   ansible.builtin.file:
-#     path: "{{ zabbix_agent_scripts_dir }}"
-#     state: directory
-#     owner: root
-#     group: root
-#     mode: "0755"
+- name: Includes shared tasks
+  ansible.builtin.import_tasks: deploy_shared_core.yaml
 
-# - name: Deploy zabbix_agent2.conf file
-#   ansible.builtin.template:
-#     src: templates/zabbix_agent2.conf.j2
-#     dest: "{{ zabbix_dir.conf }}/zabbix_agent2.conf"
-#     owner: root
-#     group: "{{ zabbix_system.name }}"
-#     mode: "0640"
+- name: Create script directory
+  ansible.builtin.file:
+    path: "{{ zabbix_dir.agent.scripts }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
 
-# - name: Create PSK file
-#   when: zabbix_agent_config.connection.psk is defined
-#   ansible.builtin.copy:
-#     dest: "{{ zabbix_dir.conf }}/{{ zabbix_agent_config.connection.psk.key_filename }}"
-#     content: "{{ zabbix_agent_config.connection.psk.key }}"
-#     owner: "root"
-#     group: "{{ zabbix_system.name }}"
-#     mode: "0640"
+- name: Deploy agent configuration
+  ansible.builtin.template:
+    src: templates/agent/zabbix_agent2.conf.j2
+    dest: "{{ zabbix_dir.conf }}/zabbix_agent2.conf"
+    owner: root
+    group: "{{ zabbix_user.name }}"
+    mode: "0640"
 
-# - name: Deploy logrotate configuration
-#   ansible.builtin.template:
-#     src: templates/zabbix_agent2.logrotate.j2
-#     dest: "{{ zabbix_logrotate.file.agent }}"
-#     owner: root
-#     group: root
-#     mode: "0644"
+- name: Add PSK file
+  when: zabbix_agent_instc_config.connection.psk is defined
+  ansible.builtin.copy:
+    dest: "{{ zabbix_agent_instc_config.connection.psk.key_file }}"
+    content: "{{ zabbix_agent_instc_config.connection.psk.key }}"
+    owner: "root"
+    group: "{{ zabbix_user.name }}"
+    mode: "0640"
 
-# - name: Start and enable service
-#   ansible.builtin.service:
-#     name: zabbix-agent2
-#     state: started
-#     enabled: true
+- name: Start and enable service
+  ansible.builtin.service:
+    name: zabbix-agent2
+    state: started
+    enabled: true

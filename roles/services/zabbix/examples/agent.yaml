@@ -1,0 +1,41 @@
+# Zabbix Agent
+
+# Default([])
+hostnames: ["my-hostname"]
+
+# Default(10050)
+port: 11050
+
+# Active only if present.
+status_port: 12050
+
+# If present, it will be enabled.
+active_mode:
+  # Required.
+  # Each item can be a single server or a cluster.
+  servers: ["192.168.0.1;192.168.0.2:11051", "192.168.0.3"]
+  tls_connect: psk # Default(cert)
+
+# If present, it will be enabled.
+passive_mode:
+  # Required
+  allowed_servers: ["192.168.0.0/24", "192.168.1.0/24"]
+  tls_accept: ["psk", "cert"] # Default([cert])
+
+# Default(3)
+log_level: 2
+
+connection:
+  # If present, it will be enabled.
+  psk:
+    name: mypsk # Required
+    key: mykey # Required
+    key_file: /my.psk # Required
+  # If present, it will be enabled.
+  tls:
+    ca_file: /ca.crt # Required
+    crl_file: /file.crl
+    cert_file: /cert.pem # Required
+    pkey_file: /cert.key # Required
+    server_subject: cn=subject
+    server_issuer: cn=issuer
