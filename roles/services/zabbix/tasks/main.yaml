@@ -1,3 +1,7 @@
+- name: Server deployment
+  when: zabbix_server is defined
+  ansible.builtin.include_tasks: deploy_server.yaml
+
 - name: Agent deployment
   when: zabbix_agent is defined
   ansible.builtin.include_tasks: deploy_agent.yaml

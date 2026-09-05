@@ -11,9 +11,9 @@ zabbix_dir:
   data: /var/lib/zabbix
   logs: /var/log/zabbix
   run: /run/zabbix
-  # server:
-  #   scripts: /usr/lib/zabbix/externalscripts
-  #   alert_scripts: /usr/lib/zabbix/alertscripts
-  #   tmp: /tmp
+  server:
+    scripts: /usr/lib/zabbix/externalscripts
+    alert_scripts: /usr/lib/zabbix/alertscripts
+    tmp: /tmp
   agent:
     scripts: /usr/lib/zabbix/agent-scripts

@@ -1,0 +1,81 @@
+- name: Include vars - Config
+  ansible.builtin.include_vars:
+    file: "{{ zabbix_server.config_file }}"
+    name: zabbix_srv_instc_config
+
+- name: Set OS facts
+  ansible.builtin.set_fact:
+    zabbix_os_type: "{{ ansible_facts.system | lower }}"
+    zabbix_os_family: "{{ ansible_facts.os_family | lower }}"
+
+- name: OS type support check
+  ansible.builtin.assert:
+    that: zabbix_os_type == 'linux'
+    success_msg: "Supported OS type."
+    fail_msg: "Unsupported OS type: {{ zabbix_os_type }}."
+    quiet: true
+
+- name: OS family support check
+  ansible.builtin.assert:
+    that: zabbix_os_family == 'debian'
+    success_msg: "Supported OS family."
+    fail_msg: "Unsupported OS family: {{ zabbix_os_family }}."
+    quiet: true
+
+- name: Install packages
+  ansible.builtin.apt:
+    name:
+      - zabbix-server-pgsql
+      - zabbix-frontend-php
+      - zabbix-sql-scripts
+    state: present
+
+- name: Stop and disable service
+  ansible.builtin.service:
+    name: zabbix-server
+    state: stopped
+    enabled: false
+
+- name: Includes shared tasks
+  ansible.builtin.import_tasks: deploy_shared_core.yaml
+
+- name: Create additional directories
+  ansible.builtin.file:
+    path: "{{ dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - "{{ zabbix_dir.server.scripts }}"
+    - "{{ zabbix_dir.server.alert_scripts }}"
+  loop_control:
+    loop_var: dir
+    label: "{{ dir }}"
+
+- name: Deploy server configuration
+  ansible.builtin.template:
+    src: templates/server/zabbix_server.conf.j2
+    dest: "{{ zabbix_dir.conf }}/zabbix_server.conf"
+    owner: root
+    group: "{{ zabbix_user.name }}"
+    mode: "0640"
+
+- name: Remove rotate log configuration
+  ansible.builtin.file:
+    path: /etc/logrotate.d/zabbix-server-pgsql
+    state: absent
+
+- name: Deploy configuration - Rotate log files
+  ansible.builtin.template:
+    src: templates/server/logrotate.j2
+    dest: "/etc/logrotate.d/zabbix-server"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Start and enable service
+  ansible.builtin.service:
+    name: zabbix-server
+    state: started
+    enabled: true
