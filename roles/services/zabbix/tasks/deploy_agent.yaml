@@ -66,6 +66,22 @@
     group: "{{ zabbix_user.name }}"
     mode: "0640"
 
+- name: Create Systemd directory - Override
+  ansible.builtin.file:
+    path: /etc/systemd/system/zabbix-agent2.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy Systemd service - Override
+  ansible.builtin.template:
+    src: templates/agent/systemd.conf.j2
+    dest: /etc/systemd/system/zabbix-agent2.service.d/override.conf
+    owner: root
+    group: root
+    mode: "0644"
+
 - name: Remove rotate log configuration
   ansible.builtin.file:
     path: /etc/logrotate.d/zabbix-agent2
