@@ -43,11 +43,11 @@ StatusPort={{ zabbix_agent_instc_config.status_port }}
 {% endif %}
 
 # Buffer
-BufferSend=60
+BufferSend=30
 BufferSize=1000
 
-EnablePersistentBuffer=0
-PersistentBufferFile={{ zabbix_dir.data }}/zabbix-agent2.db
+EnablePersistentBuffer=1
+PersistentBufferFile={{ zabbix_dir.data }}/zabbix-agent.db
 PersistentBufferPeriod=2h
 
 # Connection
@@ -58,7 +58,7 @@ PluginTimeout=15
 LogType=file
 DebugLevel={{ zabbix_agent_instc_config.log_level | default(3) }}
 
-LogFile={{ zabbix_dir.logs }}/zabbix-agent2.log
+LogFile={{ zabbix_dir.logs }}/zabbix-agent.log
 LogFileSize=0
 
 Plugins.Log.MaxLinesPerSecond=20
@@ -87,10 +87,6 @@ TLSServerCertSubject={{ zabbix_agent_instc_config.connection.tls.server_subject 
 TLSServerCertIssuer={{ zabbix_agent_instc_config.connection.tls.server_issuer }}
 {% endif %}
 {% endif %}
-
-## Ciphers
-TLSCipherAll=ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-PSK-CHACHA20-POLY1305:ECDHE-PSK-AES256-GCM-SHA384:ECDHE-PSK-AES128-GCM-SHA256
-TLSCipherAll13=TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256
 
 # Include configuration files
 Include={{ zabbix_dir.conf }}/zabbix_agent2.d/*.conf

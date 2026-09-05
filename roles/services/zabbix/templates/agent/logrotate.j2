@@ -1,9 +1,10 @@
 # Zabbix Agent - logrotate
 
-{{ zabbix_dir.logs }}/zabbix-agent2.log {
+{{ zabbix_dir.logs }}/zabbix-agent.log {
   daily
   missingok
   notifempty
+  rotate -1
   maxage 210
   create 0640 {{ zabbix_user.name }} {{ zabbix_user.name }}
   compress
