@@ -1,6 +1,7 @@
 # If defined, the Zabbix agent will be deployed and configured.
 zabbix_agent:
   # Required.
-  # Referenced by (zabbix_agent_instc_config).
-  # See: config_agent.yaml.
-  config_file: /config.yaml
+  # Referenced by "zabbix_agent_instc_config".
+  config_file: config.yaml
+  # Referenced by "zabbix_agent_instc_vault".
+  vault_file: vault.yaml

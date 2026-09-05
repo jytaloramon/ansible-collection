@@ -17,31 +17,26 @@
     fail_msg: "Unsupported OS family: {{ zabbix_os_family }}."
     quiet: true
 
+- name: Include vars - Vault
+  ansible.builtin.include_vars:
+    file: "{{ zabbix_agent.vault_file | default('empty.yaml') }}"
+    name: zabbix_agent_instc_vault
 
+- name: Include vars - Config
+  ansible.builtin.include_vars:
+    file: "{{ zabbix_agent.config_file }}"
+    name: zabbix_agent_instc_config
 
+- name: Install package
+  ansible.builtin.apt:
+    name: zabbix-agent2
+    state: present
 
-
-
-
-# - name: Instance Load - Config
-#   ansible.builtin.include_vars:
-#     file: "{{ zabbix_agent.config_file }}"
-#     name: zabbix_agent_config
-
-# - name: Install packages
-#   ansible.builtin.apt:
-#     name: zabbix-agent2
-#     state: present
-
-# - name: Import OS-specific tasks
-#   ansible.builtin.include_tasks: "agent_{{ ansible_facts.os_family | lower }}.yaml"
-
-# - name: Stop and disable service
-#   ansible.builtin.service:
-#     name: zabbix-agent2
-#     state: stopped
-#     enabled: false
-
+- name: Stop and disable service
+  ansible.builtin.service:
+    name: zabbix-agent2
+    state: stopped
+    enabled: false
 # - name: Install shared core
 #   ansible.builtin.import_tasks: install_shared_core.yaml
 
