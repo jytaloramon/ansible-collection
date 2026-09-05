@@ -1,0 +1,34 @@
+# Default(10051)
+port: 11051
+
+# Active only if present.
+stats_allowed_from: ["127.0.0.1", "::1"]
+
+# Required
+db:
+  name: db_name # Required
+  host: db.myorg
+  port: 5432
+  user: dbuser
+  password: dbpassword
+  schema: public
+  socket: file.socket
+  # If present, it will be enabled.
+  tls:
+    ca_file: /ca.crt # Required
+    verify_mode: verify_ca # Default(verify_full)
+    cert_file: /cert.pem
+    pkey_file: /cert.key
+
+# Default(3)
+log_level: 2
+
+connection:
+  # If present, it will be enabled.
+  ssh_key_location: /ssh
+  # If present, it will be enabled.
+  tls:
+    ca_file: /ca.crt # Required
+    crl_file: /file.crl
+    cert_file: /cert.pem # Required
+    pkey_file: /cert.key # Required

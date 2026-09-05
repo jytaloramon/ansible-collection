@@ -1,0 +1,122 @@
+# Zabbix Server configuration file
+
+# Core
+AllowRoot=0
+User={{ zabbix_user.name }}
+
+PidFile={{ zabbix_dir.run }}/zabbix_server.pid
+
+EnableGlobalScripts=0
+
+AllowSoftwareUpdateCheck=1
+
+ServiceManagerSyncFrequency=60
+
+SocketDir={{ zabbix_dir.run }}
+ExternalScripts={{ zabbix_dir.server.scripts }}
+AlertScriptsPath={{ zabbix_dir.server.alert_scripts }}
+TmpDir={{ zabbix_dir.server.tmp }}
+
+SNMPTrapperFile={{ zabbix_dir.server.tmp }}/snmptrap.tmp
+
+FpingLocation=/usr/bin/fping
+Fping6Location=/usr/bin/fping6
+
+# High availability
+
+# Zabbix Trapper 
+ListenIP=0.0.0.0
+ListenPort={{ zabbix_srv_instc_config.port | default(10051) }}
+
+{% if zabbix_srv_instc_config.stats_allowed_from | default([]) %}
+# Stats
+StatsAllowedIP={{ zabbix_srv_instc_config.stats_allowed_from | join(',') }}
+
+{% endif %}
+# Database
+DBName={{ zabbix_srv_instc_config.db.name }}
+{% if zabbix_srv_instc_config.db.host is defined %}
+DBHost={{ zabbix_srv_instc_config.db.host }}
+{% endif %}
+{% if zabbix_srv_instc_config.db.port is defined %}
+DBPort={{ zabbix_srv_instc_config.db.port }}
+{% endif %}
+{% if zabbix_srv_instc_config.db.user is defined %}
+DBUser={{ zabbix_srv_instc_config.db.user }}
+{% endif %}
+{% if zabbix_srv_instc_config.db.password is defined %}
+DBPassword={{ zabbix_srv_instc_config.db.password }}
+{% endif %}
+{% if zabbix_srv_instc_config.db.schema is defined %}
+DBSchema={{ zabbix_srv_instc_config.db.schema }}
+{% endif %}
+{% if zabbix_srv_instc_config.db.socket is defined %}
+DBSocket={{ zabbix_srv_instc_config.db.socket }}
+{% endif %}
+{% if zabbix_srv_instc_config.db.tls is defined %}
+DBTLSCAFile={{ zabbix_srv_instc_config.db.tls.ca_file }}
+DBTLSConnect={{ zabbix_srv_instc_config.db.tls.verify_mode | default('verify_full') }}
+{% if zabbix_srv_instc_config.db.tls.cert_file is defined %}
+DBTLSCertFile={{ zabbix_srv_instc_config.db.tls.cert_file }}
+DBTLSKeyFile={{ zabbix_srv_instc_config.db.tls.pkey_file }}
+{% endif %}
+{% endif %}
+
+# Proxy - Passive
+ProxyConfigFrequency=60
+ProxyDataFrequency=60
+
+# Cache
+CacheSize=128M
+HistoryCacheSize=64M
+HistoryIndexCacheSize=16M
+
+TrendCacheSize=8M
+TrendFunctionCacheSize=8M
+
+ValueCacheSize=16M
+
+CacheUpdateFrequency=60
+
+# Housekeeping
+HousekeepingFrequency=1
+ProblemHousekeepingFrequency=300
+MaxHousekeeperDelete=10000
+
+# Connection
+Timeout=10
+TrapperTimeout=180
+
+UnavailableDelay=180
+UnreachableDelay=30
+UnreachablePeriod=60
+
+# Logging
+LogType=file
+DebugLevel={{ zabbix_srv_instc_config.log_level | default(3) }}
+
+LogFile={{ zabbix_dir.logs }}/zabbix-server.log
+LogFileSize=0
+
+LogSlowQueries=5000
+
+# Communication
+{% if zabbix_srv_instc_config.connection.ssh_key_location is defined %}
+
+## SSH
+SSHKeyLocation={{ zabbix_srv_instc_config.connection.ssh_key_location }}
+{% endif %}
+{% if zabbix_srv_instc_config.connection.tls is defined %}
+
+## Encrypted - TLS
+TLSCAFile={{ zabbix_srv_instc_config.connection.tls.ca_file }}
+{% if zabbix_srv_instc_config.connection.tls.crl_file is defined %}
+TLSCRLFile={{ zabbix_srv_instc_config.connection.tls.crl_file }}
+{% endif %}
+TLSCertFile={{ zabbix_srv_instc_config.connection.tls.cert_file }}
+TLSKeyFile={{ zabbix_srv_instc_config.connection.tls.pkey_file }}
+{% endif %}
+
+# Include configuration files
+Include={{ zabbix_dir.conf }}/zabbix_server.d/*.conf
+
