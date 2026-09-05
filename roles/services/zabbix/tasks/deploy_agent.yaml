@@ -1,3 +1,13 @@
+- name: Include vars - Vault
+  ansible.builtin.include_vars:
+    file: "{{ zabbix_agent.vault_file | default('empty.yaml') }}"
+    name: zabbix_agent_instc_vault
+
+- name: Include vars - Config
+  ansible.builtin.include_vars:
+    file: "{{ zabbix_agent.config_file }}"
+    name: zabbix_agent_instc_config
+
 - name: Set OS facts
   ansible.builtin.set_fact:
     zabbix_os_type: "{{ ansible_facts.system | lower }}"
@@ -16,16 +26,6 @@
     success_msg: "Supported OS family."
     fail_msg: "Unsupported OS family: {{ zabbix_os_family }}."
     quiet: true
-
-- name: Include vars - Vault
-  ansible.builtin.include_vars:
-    file: "{{ zabbix_agent.vault_file | default('empty.yaml') }}"
-    name: zabbix_agent_instc_vault
-
-- name: Include vars - Config
-  ansible.builtin.include_vars:
-    file: "{{ zabbix_agent.config_file }}"
-    name: zabbix_agent_instc_config
 
 - name: Install package
   ansible.builtin.apt:
