@@ -1,0 +1,120 @@
+- name: Set OS facts
+  ansible.builtin.set_fact:
+    php_os_type: "{{ ansible_facts.system | lower }}"
+    php_os_family: "{{ ansible_facts.os_family | lower }}"
+
+- name: OS type support check
+  ansible.builtin.assert:
+    that: php_os_type == 'linux'
+    success_msg: "Supported OS type."
+    fail_msg: "Unsupported OS type: {{ php_os_type }}."
+    quiet: true
+
+- name: OS family support check
+  ansible.builtin.assert:
+    that: php_os_family in ['debian', 'redhat']
+    success_msg: "Supported OS family."
+    fail_msg: "Unsupported OS family: {{ php_os_family }}."
+    quiet: true
+
+- name: Includes tasks based on the OS
+  ansible.builtin.include_tasks: "{{ php_os_type }}_{{ php_os_family }}.yaml"
+
+- name: Set PHP facts
+  ansible.builtin.set_fact:
+    php_service_name: "php{{ php_version_result.stdout | default('') }}-fpm"
+    php_bin_name: "php-fpm{{ php_version_result.stdout | default('') }}"
+
+- name: Stop and disable service
+  ansible.builtin.service:
+    name: "{{ php_service_name }}"
+    state: stopped
+    enabled: false
+
+- name: Create system group
+  ansible.builtin.group:
+    name: "{{ php_user.name }}"
+    gid: "{{ php_user.gid }}"
+    system: true
+    state: present
+
+- name: Create system user
+  ansible.builtin.user:
+    name: "{{ php_user.name }}"
+    uid: "{{ php_user.uid }}"
+    password: "*"
+    group: "{{ php_user.name }}"
+    groups: "{{ php_user.groups }}"
+    create_home: false
+    home: /nonexistent
+    shell: "{{ php_user.shell }}"
+    comment: "{{ php_user.gecos }}"
+    system: true
+    state: present
+
+- name: Create directories
+  ansible.builtin.file:
+    path: "{{ dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - "{{ php_dir.conf }}"
+    - "{{ php_dir.conf }}/pool.d"
+    - "{{ php_dir.conf }}/conf.d"
+    - "{{ php_dir.conf }}/mods-available"
+  loop_control:
+    loop_var: dir
+    label: "{{ dir }}"
+
+- name: Create Log directory
+  ansible.builtin.file:
+    path: "{{ php_dir.logs }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+
+- name: Deploy PHP-FPM configuration file
+  ansible.builtin.template:
+    src: templates/php-fpm.conf.j2
+    dest: "{{ php_dir.conf }}/php-fpm.conf"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Deploy Pools
+  ansible.builtin.template:
+    src: templates/pools/{{ pool }}.conf.j2
+    dest: "{{ php_dir.conf }}/pool.d/{{ pool }}.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - healthcheck
+  loop_control:
+    loop_var: pool
+    label: "{{ pool }}"
+
+- name: Create Systemd directory - Override
+  ansible.builtin.file:
+    path: "/etc/systemd/system/{{ php_service_name }}.service.d"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy Systemd service - Override
+  ansible.builtin.template:
+    src: templates/systemd.conf.j2
+    dest: /etc/systemd/system/{{ php_service_name }}.service.d/override.conf
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Start and enable service
+  ansible.builtin.service:
+    name: "{{ php_service_name }}"
+    state: started
+    enabled: true

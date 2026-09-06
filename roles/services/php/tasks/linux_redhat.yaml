@@ -1,0 +1,17 @@
+- name: Install package
+  ansible.builtin.dnf:
+    name: "php-fpm{{ '-{}'.format(php_pkg.version) if php_pkg.version is defined else '' }}"
+    state: present
+
+- name: Remove default configuration
+  ansible.builtin.file:
+    path: "/etc/{{ filename }}"
+    state: absent
+  loop:
+    - php.ini
+    - php.d
+    - php-fpm.d
+    - php-fpm.conf
+  loop_control:
+    loop_var: filename
+    label: "{{ filename }}"

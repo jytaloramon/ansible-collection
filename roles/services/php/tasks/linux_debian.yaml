@@ -1,0 +1,16 @@
+- name: Install package
+  ansible.builtin.apt:
+    name: "php{{ php_pkg.version | default('') }}-fpm"
+    state: present
+
+- name: Discover PHP version
+  when: php_pkg.version is undefined
+  ansible.builtin.command:
+    cmd: php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;'
+  register: php_version_result
+  changed_when: false
+
+- name: Remove default configuration
+  ansible.builtin.file:
+    path: "/etc/php/{{ php_version_result.stdout }}"
+    state: absent

@@ -1,0 +1,12 @@
+php_user:
+  name: php
+  uid: 1024
+  gid: 1024
+  gecos: PHP
+  shell: /usr/sbin/nologin
+  groups: []
+
+php_dir:
+  conf: /etc/php
+  logs: /var/log/php
+  run: /run/php

@@ -1,0 +1,12 @@
+[Service]
+RuntimeDirectory=php
+RuntimeDirectoryMode=0755
+PrivateTmp=true
+
+ExecStartPre=
+ExecStartPre=/usr/sbin/{{ php_bin_name }} --test -c {{ php_dir.conf }} --fpm-config {{ php_dir.conf }}/php-fpm.conf
+ExecStart=
+ExecStart=/usr/sbin/{{ php_bin_name }} --nodaemonize -c {{ php_dir.conf }} --fpm-config {{ php_dir.conf }}/php-fpm.conf
+ExecStartPost=
+ExecReload=/bin/kill -USR2 $MAINPID
+

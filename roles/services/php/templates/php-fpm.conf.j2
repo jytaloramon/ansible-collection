@@ -1,0 +1,19 @@
+; PHP-FPM configuration file
+
+[global]
+; Core
+pid = {{ php_dir.run }}/php-fpm.pid
+daemonize = yes
+
+; Log
+error_log = {{ php_dir.logs }}/php-fpm.log
+log_level = warning
+log_limit = 512
+log_buffering = yes
+
+syslog.facility = daemon
+syslog.ident = php-fpm
+
+; Include Pools
+include={{ php_dir.conf }}/pool.d/*.conf
+
