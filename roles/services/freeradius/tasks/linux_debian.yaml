@@ -25,23 +25,18 @@
     name: freerad
     state: absent
 
-- name: Configure init options
-  ansible.builtin.lineinfile:
-    path: /etc/default/freeradius
-    regexp: "^FREERADIUS_OPTIONS="
-    line: 'FREERADIUS_OPTIONS="-P -d {{ freeradius_instc_ctx.dir.conf }}"'
-# - name: Create Systemd directory - Override
-#   ansible.builtin.file:
-#     path: /etc/systemd/system/freeradius.service.d
-#     state: directory
-#     owner: root
-#     group: root
-#     mode: "0755"
+- name: Create Systemd directory - Override
+  ansible.builtin.file:
+    path: /etc/systemd/system/freeradius.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
 
-# - name: Deploy Systemd service - Override
-#   ansible.builtin.template:
-#     src: templates/init/systemd_debian.conf.j2
-#     dest: /etc/systemd/system/freeradius.service.d/override.conf
-#     owner: root
-#     group: root
-#     mode: "0644"
+- name: Deploy Systemd service - Override
+  ansible.builtin.template:
+    src: templates/systemd.conf.j2
+    dest: /etc/systemd/system/freeradius.service.d/override.conf
+    owner: root
+    group: root
+    mode: "0644"

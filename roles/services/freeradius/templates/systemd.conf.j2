@@ -1,0 +1,26 @@
+[Service]
+{% if freeradius_os_family == 'redhat' %}
+EnvironmentFile=-/etc/default/radiusd
+
+{% endif %}
+# Runtime directory
+RuntimeDirectory=freeradius
+RuntimeDirectoryMode=0755
+
+# User/Group
+User={{ freeradius_user.native.name }}
+Group={{ freeradius_user.native.name }}
+
+# Limit memory
+MemoryMax=1G
+
+{% if freeradius_os_family == 'debian' %}
+# Exec 
+#ExecStartPre=
+#ExecStartPre=/usr/sbin/freeradius $FREERADIUS_OPTIONS -Cx -lstdout
+
+{% endif %}
+# Read/Write paths
+ReadOnlyPaths={{ freeradius_dir.conf }}
+ReadWritePaths={{ freeradius_dir.data }} {{ freeradius_dir.cache }} {{ freeradius_dir.logs }}
+

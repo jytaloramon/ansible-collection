@@ -24,23 +24,24 @@
   ansible.builtin.group:
     name: radiusd
     state: absent
+
 # - name: Remove default configuration
 #   ansible.builtin.file:
 #     path: /etc/raddb
 #     state: absent
 
-# - name: Create Systemd directory - Override
-#   ansible.builtin.file:
-#     path: /etc/systemd/system/radiusd.service.d
-#     state: directory
-#     owner: root
-#     group: root
-#     mode: "0755"
+- name: Create Systemd directory - Override
+  ansible.builtin.file:
+    path: /etc/systemd/system/radiusd.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
 
-# - name: Deploy Systemd service - Override
-#   ansible.builtin.template:
-#     src: templates/init/systemd_redhat.conf.j2
-#     dest: /etc/systemd/system/radiusd.service.d/override.conf
-#     owner: root
-#     group: root
-#     mode: "0644"
+- name: Deploy Systemd service - Override
+  ansible.builtin.template:
+    src: templates/systemd.conf.j2
+    dest: /etc/systemd/system/radiusd.service.d/override.conf
+    owner: root
+    group: root
+    mode: "0644"
