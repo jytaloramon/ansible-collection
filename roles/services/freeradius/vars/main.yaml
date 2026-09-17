@@ -1,0 +1,18 @@
+freeradius_user:
+  native:
+    name: freeradius
+    uid: 1024
+    gid: 1024
+    gecos: FreeRADIUS
+    shell: /usr/sbin/nologin
+    groups: []
+  docker:
+    uid: 1024
+    gid: 1024
+
+freeradius_dir:
+  conf: /etc/freeradius
+  data: /var/lib/freeradius
+  cache: /var/cache/freeradius
+  logs: /var/log/freeradius
+  run: /run/freeradius

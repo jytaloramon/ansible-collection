@@ -1,0 +1,39 @@
+- name: Create configuration directory
+  ansible.builtin.file:
+    path: "{{ freeradius_instance.dir.conf }}"
+    state: directory
+    owner: "{{ freeradius_instance.root.uid }}"
+    group: "{{ freeradius_instance.user.gid }}"
+    mode: "0750"
+
+- name: Create directories
+  ansible.builtin.file:
+    path: "{{ dir }}"
+    state: directory
+    owner: "{{ freeradius_instance.user.uid }}"
+    group: "{{ freeradius_instance.user.gid }}"
+    mode: "0750"
+  loop: "{{
+    [freeradius_instance.dir.data,
+    freeradius_instance.dir.cache,
+    freeradius_instance.dir.logs]
+    | select('defined') }}"
+  loop_control:
+    loop_var: dir
+    label: "{{ dir }}"
+
+- name: Deploy instance TXT
+  ansible.builtin.copy:
+    dest: "{{ freeradius_instance.dir.conf }}/instance.txt"
+    content: "name: {{ freeradius_ctx.name }}\n"
+    owner: "{{ freeradius_instance.root.uid }}"
+    group: "{{ freeradius_instance.root.gid }}"
+    mode: "0644"
+
+- name: Deploy log rotation configuration
+  ansible.builtin.template:
+    src: templates/logrotate.j2
+    dest: "/etc/logrotate.d/freeradius{{ '.{}'.format(freeradius_ctx.name) if freeradius_instance.deployment == 'container' }}"
+    owner: root
+    group: root
+    mode: "0644"

@@ -1,0 +1,68 @@
+- name: Set context facts
+  ansible.builtin.set_fact:
+    freeradius_ctx: "{{ freeradius_native }}"
+
+- name: Includes a task to load context variables
+  ansible.builtin.import_tasks: include_context_vars.yaml
+
+- name: Set OS facts
+  ansible.builtin.set_fact:
+    freeradius_os_type: "{{ ansible_facts.system | lower }}"
+    freeradius_os_family: "{{ ansible_facts.os_family | lower }}"
+
+- name: OS type support check
+  ansible.builtin.assert:
+    that: freeradius_os_type == 'linux'
+    success_msg: "Supported OS type."
+    fail_msg: "Unsupported OS type: {{ freeradius_os_type }}."
+    quiet: true
+
+- name: OS family support check
+  ansible.builtin.assert:
+    that: freeradius_os_family in ['debian', 'redhat']
+    success_msg: "Supported OS family."
+    fail_msg: "Unsupported OS family: {{ freeradius_os_family }}."
+    quiet: true
+
+- name: Set instance facts
+  ansible.builtin.set_fact:
+    freeradius_instance:
+      deployment: native
+      dir:
+        conf: "{{ freeradius_dir.conf }}"
+        data: "{{ freeradius_dir.data }}"
+        cache: "{{ freeradius_dir.cache }}"
+        logs: "{{ freeradius_dir.logs }}"
+      root:
+        uid: 0
+        gid: 0
+      user:
+        uid: "{{ freeradius_user.native.uid }}"
+        gid: "{{ freeradius_user.native.gid }}"
+
+# - name: Includes tasks based on the OS
+#   ansible.builtin.include_tasks: "{{ freeradius_os_type }}_{{ freeradius_os_family }}.yaml"
+
+# - name: Create system group
+#   ansible.builtin.group:
+#     name: "{{ freeradius_user.native.name }}"
+#     gid: "{{ freeradius_user.native.gid }}"
+#     system: true
+#     state: present
+
+# - name: Create system user
+#   ansible.builtin.user:
+#     name: "{{ freeradius_user.native.name }}"
+#     uid: "{{ freeradius_user.native.uid }}"
+#     password: "*"
+#     group: "{{ freeradius_user.native.name }}"
+#     groups: "{{ freeradius_user.native.groups }}"
+#     create_home: false
+#     home: /nonexistent
+#     shell: "{{ freeradius_user.native.shell }}"
+#     comment: "{{ freeradius_user.native.gecos }}"
+#     system: true
+#     state: present
+
+- name: Includes shared tasks
+  ansible.builtin.import_tasks: deploy_shared_core.yaml

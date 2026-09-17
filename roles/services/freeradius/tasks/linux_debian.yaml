@@ -1,0 +1,47 @@
+- name: Install packages
+  ansible.builtin.apt:
+    name:
+      - "freeradius{{ freeradius_ctx.pkg_version | default('') }}"
+      - "freeradius-krb5{{ freeradius_ctx.pkg_version | default('') }}"
+      - "freeradius-ldap{{ freeradius_ctx.pkg_version | default('') }}"
+      - "freeradius-python3{{ freeradius_ctx.pkg_version | default('') }}"
+      - "freeradius-rest{{ freeradius_ctx.pkg_version | default('') }}"
+      - "freeradius-utils{{ freeradius_ctx.pkg_version | default('') }}"
+    state: present
+
+- name: Stop and disable service
+  ansible.builtin.service:
+    name: freeradius
+    state: stopped
+    enabled: false
+
+- name: Remove default system user
+  ansible.builtin.user:
+    name: freerad
+    state: absent
+
+- name: Remove default system group
+  ansible.builtin.group:
+    name: freerad
+    state: absent
+
+- name: Configure init options
+  ansible.builtin.lineinfile:
+    path: /etc/default/freeradius
+    regexp: "^FREERADIUS_OPTIONS="
+    line: 'FREERADIUS_OPTIONS="-P -d {{ freeradius_instc_ctx.dir.conf }}"'
+# - name: Create Systemd directory - Override
+#   ansible.builtin.file:
+#     path: /etc/systemd/system/freeradius.service.d
+#     state: directory
+#     owner: root
+#     group: root
+#     mode: "0755"
+
+# - name: Deploy Systemd service - Override
+#   ansible.builtin.template:
+#     src: templates/init/systemd_debian.conf.j2
+#     dest: /etc/systemd/system/freeradius.service.d/override.conf
+#     owner: root
+#     group: root
+#     mode: "0644"
