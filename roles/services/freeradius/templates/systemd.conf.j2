@@ -15,9 +15,8 @@ Group={{ freeradius_user.native.name }}
 MemoryMax=1G
 
 {% if freeradius_os_family == 'debian' %}
-# Exec 
-#ExecStartPre=
-#ExecStartPre=/usr/sbin/freeradius $FREERADIUS_OPTIONS -Cx -lstdout
+ExecStartPre=
+ExecStartPre=/usr/sbin/freeradius $FREERADIUS_OPTIONS -Cx -lstdout
 
 {% endif %}
 # Read/Write paths

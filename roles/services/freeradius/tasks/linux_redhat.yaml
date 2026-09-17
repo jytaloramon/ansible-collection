@@ -25,10 +25,10 @@
     name: radiusd
     state: absent
 
-# - name: Remove default configuration
-#   ansible.builtin.file:
-#     path: /etc/raddb
-#     state: absent
+- name: Remove default configuration
+  ansible.builtin.file:
+    path: /etc/raddb
+    state: absent
 
 - name: Create Systemd directory - Override
   ansible.builtin.file:
