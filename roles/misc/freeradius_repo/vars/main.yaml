@@ -1,0 +1,2 @@
+freeradius_repo_key_file: /usr/share/keyrings/inkbridge-packages.gpg
+freeradius_repo_key_url: https://packages.inkbridgenetworks.com/pgp/packages.networkradius.com.asc

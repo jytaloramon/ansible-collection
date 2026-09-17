@@ -1,0 +1,7 @@
+- name: Add YUM repository
+  ansible.builtin.template:
+    src: templates/yum.repo.j2
+    dest: /etc/yum.repos.d/inkbridge-freeradius.repo
+    owner: root
+    group: root
+    mode: "0644"

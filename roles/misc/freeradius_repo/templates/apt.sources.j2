@@ -1,0 +1,6 @@
+Types: deb
+URIs: http://packages.inkbridgenetworks.com/freeradius-3.2/{{ ansible_facts.distribution | lower }}/{{ ansible_facts.distribution_release }}
+Suites: {{ ansible_facts.distribution_release }}
+Components: main
+Signed-By: {{ freeradius_repo_key_file }}
+
