@@ -44,20 +44,21 @@
 - name: Includes shared tasks
   when: not(freeradius_ctx.deployment.fast_bootstrap | default(false))
   ansible.builtin.import_tasks: deploy_shared_core.yaml
-# - name: Deploy compose file
-#   ansible.builtin.template:
-#     src: "{{ freeradius_instc.deployment.compose_file }}"
-#     dest: "/tmp/{{ freeradius_instc.deployment.stack_name }}.docker-compose.yaml"
-#     owner: root
-#     group: root
-#     mode: "0600"
 
-# - name: Deploy Docker stack
-#   community.docker.docker_stack:
-#     name: "{{ freeradius_instc.deployment.stack_name }}"
-#     compose: "/tmp/{{ freeradius_instc.deployment.stack_name }}.docker-compose.yaml"
+- name: Deploy compose file
+  ansible.builtin.template:
+    src: "{{ freeradius_ctx.deployment.compose_file }}"
+    dest: "/tmp/{{ freeradius_ctx.deployment.stack_name }}.docker-compose.yaml"
+    owner: root
+    group: root
+    mode: "0600"
 
-# - name: Remove compose file
-#   ansible.builtin.file:
-#     path: "/tmp/{{ freeradius_instc.deployment.stack_name }}.docker-compose.yaml"
-#     state: absent
+- name: Deploy Docker Stack
+  community.docker.docker_stack:
+    name: "{{ freeradius_ctx.deployment.stack_name }}"
+    compose: "/tmp/{{ freeradius_ctx.deployment.stack_name }}.docker-compose.yaml"
+
+- name: Remove compose file
+  ansible.builtin.file:
+    path: "/tmp/{{ freeradius_ctx.deployment.stack_name }}.docker-compose.yaml"
+    state: absent
