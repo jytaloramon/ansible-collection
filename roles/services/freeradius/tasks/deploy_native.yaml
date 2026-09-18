@@ -75,9 +75,9 @@
     group: root
     mode: "0644"
 
-- name: Deploy daemon init options
+- name: Deploy daemon params
   ansible.builtin.template:
-    src: templates/daemon_env.j2
+    src: templates/daemon_params.j2
     dest: "/etc/{{ 'default' if freeradius_os_family == 'debian' else 'sysconfig' }}/{{ freeradius_service_name }}"
     owner: root
     group: root
