@@ -9,39 +9,18 @@
       - "freeradius-utils{{ freeradius_ctx.pkg_version | default('') }}"
     state: present
 
-- name: Stop and disable service
-  ansible.builtin.service:
-    name: radiusd
-    state: stopped
-    enabled: false
+- name: Set RedHat facts
+  ansible.builtin.set_fact:
+    freeradius_service_name: radiusd
+    freeradius_default_user: radiusd
 
-- name: Remove default system user
-  ansible.builtin.user:
-    name: radiusd
-    state: absent
-
-- name: Remove default system group
-  ansible.builtin.group:
-    name: radiusd
-    state: absent
-
-- name: Remove default configuration
-  ansible.builtin.file:
+- name: Stat /etc/raddb
+  ansible.builtin.stat:
     path: /etc/raddb
-    state: absent
+  register: freeradius_default_dir_stat
 
-- name: Create Systemd directory - Override
-  ansible.builtin.file:
-    path: /etc/systemd/system/radiusd.service.d
-    state: directory
-    owner: root
-    group: root
-    mode: "0755"
-
-- name: Deploy Systemd service - Override
-  ansible.builtin.template:
-    src: templates/systemd.conf.j2
-    dest: /etc/systemd/system/radiusd.service.d/override.conf
-    owner: root
-    group: root
-    mode: "0644"
+- name: Rename configuration directory
+  when: freeradius_default_dir_stat.stat.exists
+  ansible.builtin.command:
+    cmd: "mv /etc/raddb {{ freeradius_instance.dir.conf }}"
+  changed_when: true

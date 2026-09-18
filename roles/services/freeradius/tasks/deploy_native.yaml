@@ -2,7 +2,7 @@
   ansible.builtin.set_fact:
     freeradius_ctx: "{{ freeradius_native }}"
 
-- name: Includes a task to load context variables
+- name: Includes tasks - Load context variables
   ansible.builtin.import_tasks: include_context_vars.yaml
 
 - name: Set OS facts
@@ -10,14 +10,14 @@
     freeradius_os_type: "{{ ansible_facts.system | lower }}"
     freeradius_os_family: "{{ ansible_facts.os_family | lower }}"
 
-- name: OS type support check
+- name: OS support check - Type
   ansible.builtin.assert:
     that: freeradius_os_type == 'linux'
     success_msg: "Supported OS type."
     fail_msg: "Unsupported OS type: {{ freeradius_os_type }}."
     quiet: true
 
-- name: OS family support check
+- name: OS support check - Family
   ansible.builtin.assert:
     that: freeradius_os_family in ['debian', 'redhat']
     success_msg: "Supported OS family."
@@ -33,20 +33,52 @@
         data: "{{ freeradius_dir.data }}"
         cache: "{{ freeradius_dir.cache }}"
         logs: "{{ freeradius_dir.logs }}"
-      root:
+      root_user:
         uid: 0
         gid: 0
       user:
         uid: "{{ freeradius_user.native.uid }}"
         gid: "{{ freeradius_user.native.gid }}"
 
-- name: Includes tasks based on the OS
+- name: Includes tasks - Based on the OS
   ansible.builtin.include_tasks: "{{ freeradius_os_type }}_{{ freeradius_os_family }}.yaml"
 
-- name: Configure init options
+- name: Stop and disable service
+  ansible.builtin.service:
+    name: "{{ freeradius_service_name }}"
+    state: stopped
+    enabled: false
+
+- name: Remove default system user
+  ansible.builtin.user:
+    name: "{{ freeradius_default_user }}"
+    state: absent
+
+- name: Remove default system group
+  ansible.builtin.group:
+    name: "{{ freeradius_default_user }}"
+    state: absent
+
+- name: Create Systemd directory - Override
+  ansible.builtin.file:
+    path: "/etc/systemd/system/{{ freeradius_service_name }}.service.d"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy Systemd service - Override
+  ansible.builtin.template:
+    src: templates/systemd.conf.j2
+    dest: "/etc/systemd/system/{{ freeradius_service_name }}.service.d/override.conf"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Deploy init options
   ansible.builtin.template:
     src: templates/daemon_env.j2
-    dest: "/etc/default/{{ 'freeradius' if freeradius_os_family == 'debian' else 'radiusd' }}"
+    dest: "/etc/default/{{ freeradius_service_name }}"
     owner: root
     group: root
     mode: "0644"
@@ -72,5 +104,5 @@
     system: true
     state: present
 
-- name: Includes shared tasks
+- name: Includes tasks - Shared core
   ansible.builtin.import_tasks: deploy_shared_core.yaml
