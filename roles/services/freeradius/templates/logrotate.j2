@@ -15,7 +15,7 @@
   dateext
   dateformat -%Y%m%d
 {% if freeradius_instance.deployment == 'native' %}
-  {% set pid_file = '{}/freeradius.pid'.format(freeradius_dir.run) %}
+{% set pid_file = '{}/freeradius.pid'.format(freeradius_dir.run) %}
   sharedscripts
 
   postrotate
