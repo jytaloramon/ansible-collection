@@ -17,7 +17,7 @@
     [freeradius_instance.dir.data,
     freeradius_instance.dir.cache,
     freeradius_instance.dir.logs]
-    | select('defined') }}"
+    | select }}"
   loop_control:
     loop_var: dir
     label: "{{ dir }}"

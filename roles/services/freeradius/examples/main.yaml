@@ -20,8 +20,9 @@ freeradius_instances:
 deployment_docker:
   stack_name: freeradius-stack # Required
   compose_file: docker-compose.yaml # Required
+  fast_bootstrap: true # Default(false)
   # Required
-  volumes:
+  volume:
     conf: freeradius-config # Required
     data: freeradius-data
     cache: freeradius-cache
