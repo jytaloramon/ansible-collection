@@ -9,34 +9,7 @@
       - "freeradius-utils{{ freeradius_ctx.pkg_version | default('') }}"
     state: present
 
-- name: Stop and disable service
-  ansible.builtin.service:
-    name: freeradius
-    state: stopped
-    enabled: false
-
-- name: Remove default system user
-  ansible.builtin.user:
-    name: freerad
-    state: absent
-
-- name: Remove default system group
-  ansible.builtin.group:
-    name: freerad
-    state: absent
-
-- name: Create Systemd directory - Override
-  ansible.builtin.file:
-    path: /etc/systemd/system/freeradius.service.d
-    state: directory
-    owner: root
-    group: root
-    mode: "0755"
-
-- name: Deploy Systemd service - Override
-  ansible.builtin.template:
-    src: templates/systemd.conf.j2
-    dest: /etc/systemd/system/freeradius.service.d/override.conf
-    owner: root
-    group: root
-    mode: "0644"
+- name: Set Debian facts
+  ansible.builtin.set_fact:
+    freeradius_service_name: freeradius
+    freeradius_default_user: freerad
