@@ -14,7 +14,7 @@ User={{ freeradius_user.native.name }}
 Group={{ freeradius_user.native.name }}
 
 # Limit memory
-MemoryMax=1G
+MemoryMax=1.5G
 
 {% if freeradius_os_family == 'debian' %}
 ExecStartPre=
@@ -22,6 +22,9 @@ ExecStartPre=/usr/sbin/freeradius $FREERADIUS_OPTIONS -Cx -lstdout
 
 {% endif %}
 # Read/Write paths
+ReadOnlyPaths=
 ReadOnlyPaths={{ freeradius_dir.conf }}
+
+ReadWritePaths=
 ReadWritePaths={{ freeradius_dir.data }} {{ freeradius_dir.cache }} {{ freeradius_dir.logs }}
 

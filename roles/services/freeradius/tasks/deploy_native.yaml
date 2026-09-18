@@ -43,7 +43,7 @@
 - name: Includes tasks - Based on the OS
   ansible.builtin.include_tasks: "{{ freeradius_os_type }}_{{ freeradius_os_family }}.yaml"
 
-- name: Stop and disable service
+- name: Stop service
   ansible.builtin.service:
     name: "{{ freeradius_service_name }}"
     state: stopped
@@ -106,3 +106,9 @@
 
 - name: Includes tasks - Shared core
   ansible.builtin.import_tasks: deploy_shared_core.yaml
+
+- name: Start service
+  ansible.builtin.service:
+    name: "{{ freeradius_service_name }}"
+    state: started
+    enabled: true
