@@ -1,8 +1,4 @@
 [Service]
-{% if freeradius_os_family == 'redhat' %}
-EnvironmentFile=-/etc/default/radiusd
-
-{% endif %}
 # Runtime directory
 RuntimeDirectory=
 RuntimeDirectory=freeradius
