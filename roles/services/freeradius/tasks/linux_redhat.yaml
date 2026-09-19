@@ -24,3 +24,14 @@
   ansible.builtin.command:
     cmd: "mv /etc/raddb {{ freeradius_instance.dir.conf }}"
   changed_when: true
+
+- name: Remove default directory
+  ansible.builtin.file:
+    path: "{{ dir }}"
+    state: absent
+  loop:
+    - /var/lib/radiusd
+    - /var/log/radius
+  loop_control:
+    loop_var: dir
+    label: "{{ dir }}"
