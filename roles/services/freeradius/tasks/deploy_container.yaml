@@ -5,33 +5,6 @@
 - name: Includes tasks - Load context variables
   ansible.builtin.import_tasks: include_context_vars.yaml
 
-- name: Set base UID/GID facts
-  ansible.builtin.set_fact:
-    freeradius_base_uid: "{{ docker_facts_ns_base_uid | default(0) }}"
-    freeradius_base_gid: "{{ docker_facts_ns_base_gid | default(0) }}"
-
-- name: Set instance facts
-  ansible.builtin.set_fact:
-    freeradius_instance:
-      deployment: container
-      dir:
-        conf: "{{ docker_facts_root_dir }}/volumes/{{ freeradius_ctx.deployment.volume.conf }}/_data"
-        data: "{{
-          '%s/volumes/%s/_data' % (docker_facts_root_dir, freeradius_ctx.deployment.volume.data)
-          if freeradius_ctx.deployment.volume.data is defined
-          else none }}"
-        cache: "{{
-          '%s/volumes/%s/_data' % (docker_facts_root_dir, freeradius_ctx.deployment.volume.cache)
-          if freeradius_ctx.deployment.volume.cache is defined
-          else none }}"
-        logs: "{{ docker_facts_root_dir }}/volumes/{{ freeradius_ctx.deployment.volume.logs }}/_data"
-      root_user:
-        uid: "{{ freeradius_base_uid }}"
-        gid: "{{ freeradius_base_gid }}"
-      user:
-        uid: "{{ freeradius_base_uid + freeradius_user.docker.uid }}"
-        gid: "{{ freeradius_base_gid + freeradius_user.docker.gid }}"
-
 - name: Create volume
   community.docker.docker_volume:
     volume_name: "{{ vol_name }}"
@@ -45,6 +18,10 @@
   loop_control:
     loop_var: vol_name
     label: "{{ vol_name }}"
+
+- name: Include vars - Container deployment
+  ansible.builtin.include_vars:
+    file: deploy_container.yaml
 
 - name: Includes tasks - Shared core
   when: not(freeradius_ctx.deployment.fast_bootstrap | default(false))

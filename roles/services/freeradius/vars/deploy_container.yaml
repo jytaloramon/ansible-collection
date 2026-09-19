@@ -1,0 +1,22 @@
+freeradius_deployment: container
+
+freeradius_root_user:
+  uid: "{{ docker_facts_ns_base_uid | default(0) }}"
+  gid: "{{ docker_facts_ns_base_gid | default(0) }}"
+
+freeradius_user:
+  uid: "{{ freeradius_root_user.uid + 1024 }}"
+  gid: "{{ freeradius_root_user.gid + 1024 }}"
+
+freeradius_conf_dir: "{{ docker_facts_root_dir }}/volumes/{{ freeradius_ctx.deployment.volume.conf }}/_data"
+
+freeradius_dir:
+  data: "{{
+    '%s/volumes/%s/_data' % (docker_facts_root_dir, freeradius_ctx.deployment.volume.data)
+    if freeradius_ctx.deployment.volume.data is defined
+    else none }}"
+  cache: "{{
+    '%s/volumes/%s/_data' % (docker_facts_root_dir, freeradius_ctx.deployment.volume.cache)
+    if freeradius_ctx.deployment.volume.cache is defined
+    else none }}"
+  logs: "{{ docker_facts_root_dir }}/volumes/{{ freeradius_ctx.deployment.volume.logs }}/_data"
