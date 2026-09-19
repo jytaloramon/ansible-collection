@@ -4,9 +4,9 @@
 freeradius_native:
   name: freeradius-00 # Required
   pkg_version: "3.2.10" # (Only native)
-  # Referenced by "freeradius_instc_config".
+  # Referenced by "freeradius_iconfig".
   config_file: config.yaml
-  # Referenced by "freeradius_instc_secret".
+  # Referenced by "freeradius_isecret".
   secret_file: secret.yaml
 
 # Container/Multi-instance deployment
