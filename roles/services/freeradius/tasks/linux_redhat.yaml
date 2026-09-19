@@ -9,21 +9,13 @@
       - "freeradius-utils{{ freeradius_ctx.pkg_version | default('') }}"
     state: present
 
-- name: Set RedHat facts
-  ansible.builtin.set_fact:
-    freeradius_service_name: radiusd
-    freeradius_default_user: radiusd
-
-- name: Stat /etc/raddb
-  ansible.builtin.stat:
-    path: /etc/raddb
-  register: freeradius_default_dir_stat
-
-- name: Rename configuration directory
-  when: freeradius_default_dir_stat.stat.exists
-  ansible.builtin.command:
-    cmd: "mv /etc/raddb {{ freeradius_instance.dir.conf }}"
-  changed_when: true
+- name: Create alias - Configuration directory
+  ansible.builtin.file:
+    src: "{{ freeradius_conf_dir }}"
+    dest: /etc/freeradius
+    state: link
+    owner: root
+    group: root
 
 - name: Remove default directory
   ansible.builtin.file:

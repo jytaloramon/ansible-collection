@@ -1,0 +1,4 @@
+freeradius_user_name: radiusd
+freeradius_conf_dir: /etc/raddb
+
+freeradius_service_name: radiusd

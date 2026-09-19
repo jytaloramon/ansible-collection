@@ -1,20 +1,20 @@
 # FreeRADIUS - logrotate
 
-{{ freeradius_instance.dir.logs }}/freeradius.log {
+{{ freeradius_dir.logs }}/freeradius.log {
   rotate -1
   daily
   missingok
   notifempty
   maxage 210
   nocreate
-{% if freeradius_instance.deployment != 'native' %}
+{% if freeradius_deployment != 'native' %}
   copytruncate
 {% endif %}
   compress
   delaycompress    
   dateext
   dateformat -%Y%m%d
-{% if freeradius_instance.deployment == 'native' %}
+{% if freeradius_deployment == 'native' %}
 {% set pid_file = '{}/freeradius.pid'.format(freeradius_dir.run) %}
   sharedscripts
 

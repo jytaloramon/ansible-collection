@@ -9,7 +9,10 @@
       - "freeradius-utils{{ freeradius_ctx.pkg_version | default('') }}"
     state: present
 
-- name: Set Debian facts
-  ansible.builtin.set_fact:
-    freeradius_service_name: freeradius
-    freeradius_default_user: freerad
+- name: Create alias - Configuration directory
+  ansible.builtin.file:
+    src: "{{ freeradius_conf_dir }}"
+    dest: /etc/raddb
+    state: link
+    owner: root
+    group: root
