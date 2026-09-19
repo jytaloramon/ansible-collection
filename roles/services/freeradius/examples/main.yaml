@@ -3,7 +3,7 @@
 # Native deployment
 freeradius_native:
   name: freeradius-00 # Required
-  pkg_version: "3.2.10"
+  pkg_version: "3.2.10" # (Only native)
   # Referenced by "freeradius_instc_config".
   config_file: config.yaml
   # Referenced by "freeradius_instc_secret".
@@ -12,18 +12,14 @@ freeradius_native:
 # Container/Multi-instance deployment
 freeradius_instances:
   # Required.
-  # Types: [deployment_docker]
-  - deployment: {}
-    # And "freeradius_native" properties (except "pkg_version")
-
-# Multi-instance deployment type - Docker
-deployment_docker:
-  stack_name: freeradius-stack # Required
-  compose_file: docker-compose.yaml # Required
-  fast_bootstrap: true # Default(false)
-  # Required
-  volume:
-    conf: freeradius-config # Required
-    data: freeradius-data
-    cache: freeradius-cache
-    logs: freeradius-logs # Required
+  - deployment:
+      stack_name: freeradius-stack # Required
+      compose_file: docker-compose.yaml # Required
+      fast_bootstrap: true # Default(false)
+      # Required
+      volume:
+        conf: freeradius-config # Required
+        data: freeradius-data
+        cache: freeradius-cache
+        logs: freeradius-logs # Required
+  # And "freeradius_native" properties
