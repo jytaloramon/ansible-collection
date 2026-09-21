@@ -1,1 +1,4 @@
-fluentbit_repo_gpgkey_file: /usr/share/keyrings/fluentbit-keyring.gpg
+fluentbit_repo_key_file: /usr/share/keyrings/fluentbit.gpg
+
+fluentbit_repo_pkgs_domain: packages.fluentbit.io
+fluentbit_repo_key_url: "https://{{ fluentbit_repo_pkgs_domain }}/fluentbit.key"
