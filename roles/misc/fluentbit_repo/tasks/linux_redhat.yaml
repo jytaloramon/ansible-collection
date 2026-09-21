@@ -1,0 +1,7 @@
+- name: Add repository
+  ansible.builtin.template:
+    src: templates/yum.repo.j2
+    dest: /etc/yum.repos.d/fluent-bit.repo
+    owner: root
+    group: root
+    mode: "0644"
