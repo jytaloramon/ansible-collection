@@ -1,0 +1,18 @@
+freeradius_deployment: native
+
+freeradius_root_user:
+  uid: 0
+  gid: 0
+
+freeradius_user:
+  uid: 1024
+  gid: 1024
+  gecos: FreeRADIUS
+  shell: /usr/sbin/nologin
+  groups: []
+
+freeradius_dir:
+  data: /var/lib/freeradius
+  cache: /var/cache/freeradius
+  logs: /var/log/freeradius
+  run: /run/freeradius

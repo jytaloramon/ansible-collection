@@ -1,0 +1,96 @@
+- name: Set context facts
+  ansible.builtin.set_fact:
+    freeradius_ctx: "{{ freeradius_native }}"
+
+- name: Includes tasks - Load context variables
+  ansible.builtin.import_tasks: include_context_vars.yaml
+
+- name: Set OS facts
+  ansible.builtin.set_fact:
+    freeradius_os_type: "{{ ansible_facts.system | lower }}"
+    freeradius_os_family: "{{ ansible_facts.os_family | lower }}"
+
+- name: OS support check - Type
+  ansible.builtin.assert:
+    that: freeradius_os_type == 'linux'
+    success_msg: "Supported OS type."
+    fail_msg: "Unsupported OS type: {{ freeradius_os_type }}."
+    quiet: true
+
+- name: OS support check - Family
+  ansible.builtin.assert:
+    that: freeradius_os_family in ['debian', 'redhat']
+    success_msg: "Supported OS family."
+    fail_msg: "Unsupported OS family: {{ freeradius_os_family }}."
+    quiet: true
+
+- name: Include vars - Native deployment
+  ansible.builtin.include_vars:
+    file: deploy_native.yaml
+
+- name: Include vars - OS-based
+  ansible.builtin.include_vars:
+    file: "{{ freeradius_os_type }}_{{ freeradius_os_family }}.yaml"
+
+- name: Includes tasks - OS-based
+  ansible.builtin.include_tasks: "{{ freeradius_os_type }}_{{ freeradius_os_family }}.yaml"
+
+- name: Stop service
+  ansible.builtin.service:
+    name: "{{ freeradius_service_name }}"
+    state: stopped
+    enabled: false
+
+- name: Create system group
+  ansible.builtin.group:
+    name: "{{ freeradius_user_name }}"
+    gid: "{{ freeradius_user.gid }}"
+    system: true
+    state: present
+
+- name: Create system user
+  ansible.builtin.user:
+    name: "{{ freeradius_user_name }}"
+    uid: "{{ freeradius_user.uid }}"
+    password: "*"
+    group: "{{ freeradius_user_name }}"
+    groups: "{{ freeradius_user.groups }}"
+    create_home: false
+    home: /nonexistent
+    shell: "{{ freeradius_user.shell }}"
+    comment: "{{ freeradius_user.gecos }}"
+    system: true
+    state: present
+
+- name: Deploy daemon params
+  ansible.builtin.template:
+    src: templates/daemon_params.j2
+    dest: "/etc/{{ 'default' if freeradius_os_family == 'debian' else 'sysconfig' }}/{{ freeradius_service_name }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Includes tasks - Shared core
+  ansible.builtin.import_tasks: deploy_shared_core.yaml
+
+- name: Create Systemd directory - Override
+  ansible.builtin.file:
+    path: "/etc/systemd/system/{{ freeradius_service_name }}.service.d"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy Systemd service - Override
+  ansible.builtin.template:
+    src: templates/systemd.conf.j2
+    dest: "/etc/systemd/system/{{ freeradius_service_name }}.service.d/override.conf"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Start service
+  ansible.builtin.service:
+    name: "{{ freeradius_service_name }}"
+    state: started
+    enabled: true

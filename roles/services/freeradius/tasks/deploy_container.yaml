@@ -1,0 +1,46 @@
+- name: Set context facts
+  ansible.builtin.set_fact:
+    freeradius_ctx: "{{ freeradius_ct }}"
+
+- name: Includes tasks - Load context variables
+  ansible.builtin.import_tasks: include_context_vars.yaml
+
+- name: Create volume
+  community.docker.docker_volume:
+    volume_name: "{{ vol_name }}"
+    driver: local
+  loop: "{{
+    [freeradius_ctx.deployment.volume.conf,
+    freeradius_ctx.deployment.volume.data | default(none),
+    freeradius_ctx.deployment.volume.cache | default(none),
+    freeradius_ctx.deployment.volume.logs]
+    | select }}"
+  loop_control:
+    loop_var: vol_name
+    label: "{{ vol_name }}"
+
+- name: Include vars - Container deployment
+  ansible.builtin.include_vars:
+    file: deploy_container.yaml
+
+- name: Includes tasks - Shared core
+  when: not(freeradius_ctx.deployment.fast_bootstrap | default(false))
+  ansible.builtin.import_tasks: deploy_shared_core.yaml
+
+- name: Deploy compose file
+  ansible.builtin.template:
+    src: "{{ freeradius_ctx.deployment.compose_file }}"
+    dest: "/tmp/{{ freeradius_ctx.deployment.stack_name }}.docker-compose.yaml"
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Deploy Docker Stack
+  community.docker.docker_stack:
+    name: "{{ freeradius_ctx.deployment.stack_name }}"
+    compose: "/tmp/{{ freeradius_ctx.deployment.stack_name }}.docker-compose.yaml"
+
+- name: Remove compose file
+  ansible.builtin.file:
+    path: "/tmp/{{ freeradius_ctx.deployment.stack_name }}.docker-compose.yaml"
+    state: absent

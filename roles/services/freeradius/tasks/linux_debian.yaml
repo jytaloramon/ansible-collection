@@ -1,0 +1,18 @@
+- name: Install packages
+  ansible.builtin.apt:
+    name:
+      - "freeradius{{ freeradius_ctx.pkg_version | default('') }}"
+      - "freeradius-krb5{{ freeradius_ctx.pkg_version | default('') }}"
+      - "freeradius-ldap{{ freeradius_ctx.pkg_version | default('') }}"
+      - "freeradius-python3{{ freeradius_ctx.pkg_version | default('') }}"
+      - "freeradius-rest{{ freeradius_ctx.pkg_version | default('') }}"
+      - "freeradius-utils{{ freeradius_ctx.pkg_version | default('') }}"
+    state: present
+
+- name: Create alias - Configuration directory
+  ansible.builtin.file:
+    src: "{{ freeradius_conf_dir }}"
+    dest: /etc/raddb
+    state: link
+    owner: root
+    group: root

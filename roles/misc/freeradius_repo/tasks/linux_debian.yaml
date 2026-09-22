@@ -1,0 +1,32 @@
+- name: Download GPG key
+  ansible.builtin.get_url:
+    url: "{{ freeradius_repo_key_url }}"
+    dest: /tmp/inkbridge-packages.key.asc
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Add GPG key
+  ansible.builtin.command:
+    cmd: "gpg --dearmor --yes -o {{ freeradius_repo_key_file }} /tmp/inkbridge-packages.key.asc"
+  changed_when: true
+
+- name: Add repository
+  ansible.builtin.template:
+    src: templates/apt.sources.j2
+    dest: /etc/apt/sources.list.d/inkbridge-freeradius.sources
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Add preference
+  ansible.builtin.template:
+    src: templates/apt.pref.j2
+    dest: /etc/apt/preferences.d/inkbridge-freeradius
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Synchronize package information
+  ansible.builtin.apt:
+    update_cache: true

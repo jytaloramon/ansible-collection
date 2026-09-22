@@ -1,0 +1,22 @@
+[Service]
+# Runtime directory
+RuntimeDirectory=
+RuntimeDirectory=freeradius
+RuntimeDirectoryMode=0755
+RuntimeDirectoryPreserve=no
+
+# Limit memory
+MemoryMax=1.5G
+
+{% if freeradius_os_family == 'debian' %}
+ExecStartPre=
+ExecStartPre=/usr/sbin/freeradius $FREERADIUS_OPTIONS -Cx -lstdout
+
+{% endif %}
+# Read/Write paths
+ReadOnlyPaths=
+ReadOnlyPaths={{ freeradius_conf_dir }}
+
+ReadWritePaths=
+ReadWritePaths={{ freeradius_dir.data }} {{ freeradius_dir.cache }} {{ freeradius_dir.logs }}
+

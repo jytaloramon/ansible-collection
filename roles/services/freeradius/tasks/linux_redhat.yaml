@@ -1,0 +1,30 @@
+- name: Install packages
+  ansible.builtin.dnf:
+    name:
+      - "freeradius{{ freeradius_ctx.pkg_version | default('') }}"
+      - "freeradius-krb5{{ freeradius_ctx.pkg_version | default('') }}"
+      - "freeradius-ldap{{ freeradius_ctx.pkg_version | default('') }}"
+      - "freeradius-python{{ freeradius_ctx.pkg_version | default('') }}"
+      - "freeradius-rest{{ freeradius_ctx.pkg_version | default('') }}"
+      - "freeradius-utils{{ freeradius_ctx.pkg_version | default('') }}"
+    state: present
+
+- name: Create alias - Configuration directory
+  ansible.builtin.file:
+    src: "{{ freeradius_conf_dir }}"
+    dest: /etc/freeradius
+    state: link
+    owner: root
+    group: root
+
+- name: Remove default files
+  ansible.builtin.file:
+    path: "{{ file }}"
+    state: absent
+  loop:
+    - /var/lib/radiusd
+    - /var/log/radius
+    - /etc/logrotate.d/radiusd
+  loop_control:
+    loop_var: file
+    label: "{{ file }}"

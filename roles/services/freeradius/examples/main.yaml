@@ -1,0 +1,25 @@
+# Main configuration - Example
+
+# Native deployment
+freeradius_native:
+  name: freeradius-00 # Required
+  pkg_version: "3.2.10" # (Native only)
+  # Referenced by "freeradius_iconfig".
+  config_file: config.yaml
+  # Referenced by "freeradius_isecret".
+  secret_file: secret.yaml
+
+# Container/Multi-instance deployment
+freeradius_instances:
+  # Required.
+  - deployment:
+      stack_name: freeradius-stack # Required
+      compose_file: docker-compose.yaml # Required
+      fast_bootstrap: true # Default(false)
+      # Required
+      volume:
+        conf: freeradius-config # Required
+        data: freeradius-data
+        cache: freeradius-cache
+        logs: freeradius-logs # Required
+  # And "freeradius_native" properties

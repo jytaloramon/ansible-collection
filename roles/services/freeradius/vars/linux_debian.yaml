@@ -1,0 +1,4 @@
+freeradius_user_name: freerad
+freeradius_conf_dir: /etc/freeradius
+
+freeradius_service_name: freeradius

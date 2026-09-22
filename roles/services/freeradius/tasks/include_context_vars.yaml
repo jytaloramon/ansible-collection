@@ -1,0 +1,9 @@
+- name: Include vars - Secret
+  ansible.builtin.include_vars:
+    file: "{{ freeradius_ctx.secret_file | default('empty.yaml') }}"
+    name: freeradius_isecret
+
+- name: Include vars - Config
+  ansible.builtin.include_vars:
+    file: "{{ freeradius_ctx.config_file | default('empty.yaml') }}"
+    name: freeradius_iconfig
