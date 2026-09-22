@@ -3,32 +3,32 @@
     fluentbit_os_type: "{{ ansible_facts.system | lower }}"
     fluentbit_os_family: "{{ ansible_facts.os_family | lower }}"
 
-- name: OS type support check
+- name: OS support check - Type
   ansible.builtin.assert:
     that: fluentbit_os_type == 'linux'
     success_msg: "Supported OS type."
     fail_msg: "Unsupported OS type: {{ fluentbit_os_type }}."
     quiet: true
 
-- name: OS family support check
+- name: OS support check - Family
   ansible.builtin.assert:
-    that: fluentbit_os_family == 'debian'
+    that: "fluentbit_os_family in ['debian', 'redhat']"
     success_msg: "Supported OS family."
     fail_msg: "Unsupported OS family: {{ fluentbit_os_family }}."
     quiet: true
 
 - name: Install package
-  ansible.builtin.apt:
-    name: fluent-bit
+  ansible.builtin.package:
+    name: "fluent-bit{{ fluentbit_config.pkg_version | default('') }}"
     state: present
 
-- name: Stop and disable service
+- name: Stop service
   ansible.builtin.service:
     name: fluent-bit
     state: stopped
     enabled: false
 
-- name: Remove classic configurations files
+- name: Remove classic configuration files
   ansible.builtin.file:
     path: "{{ fluentbit_dir.conf }}/{{ filename }}"
     state: absent
@@ -40,41 +40,17 @@
     loop_var: filename
     label: "{{ filename }}"
 
-- name: Copy base configuration
-  ansible.builtin.copy:
-    src: files/
-    dest: "{{ fluentbit_dir.conf }}"
+- name: Create configuration directory
+  ansible.builtin.file:
+    path: "{{ fluentbit_dir.conf }}"
+    state: directory
     owner: root
     group: root
-    mode: "0644"
-
-- name: Deploy configuration - fluent-bit
-  ansible.builtin.template:
-    src: "templates/fluent-bit.yaml.j2"
-    dest: "{{ fluentbit_dir.conf }}/fluent-bit.yaml"
-    owner: root
-    group: root
-    mode: "0644"
-
-- name: Deploy configuration - Filters
-  ansible.builtin.template:
-    src: "templates/filters.yaml.j2"
-    dest: "{{ fluentbit_dir.conf }}/filters.yaml"
-    owner: root
-    group: root
-    mode: "0644"
-
-- name: Deploy configuration - Output
-  ansible.builtin.template:
-    src: "templates/outputs.yaml.j2"
-    dest: "{{ fluentbit_dir.conf }}/outputs.yaml"
-    owner: root
-    group: root
-    mode: "0640"
+    mode: "0755"
 
 - name: Create directory
   ansible.builtin.file:
-    path: "{{ directory }}"
+    path: "{{ dir }}"
     state: directory
     owner: root
     group: root
@@ -85,8 +61,38 @@
     - "{{ fluentbit_dir.logs }}"
     - "{{ fluentbit_dir.logs }}/dead-letter"
   loop_control:
-    loop_var: directory
-    label: "{{ directory }}"
+    loop_var: dir
+    label: "{{ dir }}"
+
+- name: Copy base configuration
+  ansible.builtin.copy:
+    src: files/
+    dest: "{{ fluentbit_dir.conf }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Deploy configuration files - fluent-bit
+  ansible.builtin.template:
+    src: "templates/{{ filename }}.yaml.j2"
+    dest: "{{ fluentbit_dir.conf }}/{{ filename }}.yaml"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - fluent-bit
+    - filters
+  loop_control:
+    loop_var: filename
+    label: "{{ filename }}"
+
+- name: Deploy configuration - Output
+  ansible.builtin.template:
+    src: "templates/outputs.yaml.j2"
+    dest: "{{ fluentbit_dir.conf }}/outputs.yaml"
+    owner: root
+    group: root
+    mode: "0640"
 
 - name: Create Systemd directory - Override
   ansible.builtin.file:
@@ -112,7 +118,7 @@
     group: root
     mode: "0644"
 
-- name: Start and enable service
+- name: Start service
   ansible.builtin.service:
     name: fluent-bit
     state: started
