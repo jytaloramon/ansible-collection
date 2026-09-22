@@ -5,7 +5,7 @@ service:
   flush: 10
   grace: 30
 
-  hot_reload: "{{ 'on' if fluentbit_instc_config.enabled_hot_reload | default(true) else 'off' }}"
+  hot_reload: "{{ 'on' if fluentbit_iconfig.enabled_hot_reload | default(true) else 'off' }}"
   hot_reload.timeout: 15
 
   parsers_file: parsers.yaml
@@ -25,15 +25,15 @@ service:
 
   # Logging
   log_file: {{ fluentbit_dir.logs }}/fluent-bit.log
-  log_level: {{ fluentbit_instc_config.log_level | default('info') }}
+  log_level: {{ fluentbit_iconfig.log_level | default('info') }}
 
-  # HTTP
-{% if fluentbit_instc_config.http_server is defined %}
+{% if fluentbit_iconfig.http_server is defined %}
+  # HTTP  
   http_server: "on"
-  http_listen: "{{ fluentbit_instc_config.http_server.ip_address | default('127.0.0.1') }}"
-  http_port: "{{ fluentbit_instc_config.http_server.port | default('2020') }}"
-{% endif %}
+  http_listen: "{{ fluentbit_iconfig.http_server.ip_address | default('127.0.0.1') }}"
+  http_port: "{{ fluentbit_iconfig.http_server.port | default('2020') }}"
 
+{% endif %}
   # Storage
   storage.type: filesystem
   storage.inherit: "on"
@@ -51,7 +51,7 @@ service:
 
 includes:
   - multiline-parsers.yaml
-  - filters.yaml
   - outputs.yaml
+  - filters/*.yaml
   - inputs/*.yaml
 

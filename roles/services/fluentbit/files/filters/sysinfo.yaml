@@ -1,0 +1,5 @@
+filters:
+  - name: sysinfo
+    match: "*"
+    hostname_key: sys_host
+

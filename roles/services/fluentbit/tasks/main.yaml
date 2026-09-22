@@ -42,11 +42,18 @@
 
 - name: Create configuration directory
   ansible.builtin.file:
-    path: "{{ fluentbit_dir.conf }}"
+    path: "{{ dir }}"
     state: directory
     owner: root
     group: root
     mode: "0755"
+  loop:
+    - "{{ fluentbit_dir.conf }}"
+    - "{{ fluentbit_dir.conf }}/inputs"
+    - "{{ fluentbit_dir.conf }}/filters"
+  loop_control:
+    loop_var: dir
+    label: "{{ dir }}"
 
 - name: Create directory
   ansible.builtin.file:
@@ -56,7 +63,6 @@
     group: root
     mode: "0750"
   loop:
-    - "{{ fluentbit_dir.conf }}/inputs"
     - "{{ fluentbit_dir.data }}/storage"
     - "{{ fluentbit_dir.logs }}"
     - "{{ fluentbit_dir.logs }}/dead-letter"
@@ -71,17 +77,25 @@
     owner: root
     group: root
     mode: "0644"
+    directory_mode: "0755"
 
-- name: Deploy configuration files - fluent-bit
+- name: Deploy configuration file
   ansible.builtin.template:
-    src: "templates/{{ filename }}.yaml.j2"
-    dest: "{{ fluentbit_dir.conf }}/{{ filename }}.yaml"
+    src: templates/fluent-bit.yaml.j2
+    dest: "{{ fluentbit_dir.conf }}/fluent-bit.yaml"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Deploy inputs configuration
+  ansible.builtin.template:
+    src: "templates/inputs/{{ filename }}.yaml.j2"
+    dest: "{{ fluentbit_dir.conf }}/inputs/{{ filename }}.yaml"
     owner: root
     group: root
     mode: "0644"
   loop:
     - fluent-bit
-    - filters
   loop_control:
     loop_var: filename
     label: "{{ filename }}"
