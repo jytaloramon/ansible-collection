@@ -1,5 +1,6 @@
-filters:
-  - name: sysinfo
-    match: "*"
-    hostname_key: sys_host
+pipeline:
+  filters:
+    - name: sysinfo
+      match: "*"
+      hostname_key: sys_host
 

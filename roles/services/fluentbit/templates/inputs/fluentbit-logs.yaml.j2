@@ -2,7 +2,7 @@ pipeline:
   inputs:
     - name: tail
       path: {{ fluentbit_dir.logs }}/fluent-bit.log
-      parser: docker
+      parser: fluentbit-log
       db: {{ fluentbit_dir.data }}/tail.db
       progress_check_interval: 5
       read_from_head: true

@@ -1,2 +1,6 @@
-parsers: []
-
+parsers:
+  - name: fluentbit-log
+    format: regex
+    regex: '^\[(?<time>.*)\] \[\s*(?<level>.*)\] \[(?<component>.*)\] (?<msg>.*)$'
+    time_key: time
+    time_format: "%Y/%m/%d %H:%M:%S"

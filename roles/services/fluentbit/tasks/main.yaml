@@ -95,7 +95,7 @@
     group: root
     mode: "0644"
   loop:
-    - fluent-bit
+    - fluentbit-logs
   loop_control:
     loop_var: filename
     label: "{{ filename }}"
