@@ -1,4 +1,5 @@
 [Service]
 ExecStart=
 ExecStart=/opt/fluent-bit/bin/fluent-bit -c {{ fluentbit_dir.conf }}/fluent-bit.yaml
+ExecReload=kill -HUP $MAINPID
 

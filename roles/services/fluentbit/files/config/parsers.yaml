@@ -1,0 +1,7 @@
+parsers:
+  - name: fluent-bit
+    format: regex
+    regex: '^\[(?<time>.*)\] \[\s*(?<level>.*)\] \[(?<component>.*)\] (?<msg>.*)$'
+    time_key: time
+    time_format: "%Y/%m/%d %H:%M:%S.%L"
+    time_system_timezone: true

@@ -1,0 +1,4 @@
+fluentbit_dir:
+  conf: /etc/fluent-bit
+  data: /var/lib/fluent-bit
+  logs: /var/log/fluent-bit

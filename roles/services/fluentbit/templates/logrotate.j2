@@ -1,24 +1,29 @@
 # Fluent Bit - logrotate
 
 {{ fluentbit_dir.logs }}/*.log {
-  {{ fluentbit_logrotate.frequency }}
-  rotate {{ fluentbit_logrotate.count }}
-  maxage {{ fluentbit_logrotate.max_age }}
+  rotate -1
+  daily
   missingok
   notifempty
+  maxage 210
   nocreate
-  dateext
-  dateformat {{ fluentbit_logrotate.date_format }}
+{% if not(fluentbit_iconfig.enabled_hot_reload | default(true)) %}
+  copytruncate
+{% endif %}
   compress
   delaycompress
+  dateext
+  dateformat -%Y%m%d
   sharedscripts
+{% if fluentbit_iconfig.enabled_hot_reload | default(true) %}
 
   postrotate
     pid_target="$(pidof fluent-bit)"
 
     if [ -n "$pid_target" ]; then
-      kill -USR1 "$pid_target"
+      kill -HUP "$pid_target"
     fi
   endscript
+{% endif %}
 }
 
