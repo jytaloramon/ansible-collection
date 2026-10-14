@@ -1,0 +1,6 @@
+opensearch_repo_version: "3.x"
+
+opensearch_repo_key_file: /usr/share/keyrings/opensearch.gpg
+
+opensearch_repo_domain: artifacts.opensearch.org
+opensearch_repo_key_url: "https://{{ opensearch_repo_domain }}/publickeys/opensearch-release.pgp"

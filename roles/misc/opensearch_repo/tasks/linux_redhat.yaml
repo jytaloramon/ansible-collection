@@ -1,0 +1,14 @@
+- name: Add repository
+  ansible.builtin.get_url:
+    url: "https://{{ opensearch_repo_domain }}/releases/bundle/{{
+      component }}/{{ opensearch_repo_version }}/{{ component }}-{{ opensearch_repo_version }}.repo"
+    dest: "/etc/yum.repos.d/{{ component }}-{{ opensearch_repo_version }}.repo"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - opensearch
+    - opensearch-dashboards
+  loop_control:
+    loop_var: component
+    label: "{{ component }}"

@@ -1,0 +1,40 @@
+- name: Download GPG key
+  ansible.builtin.get_url:
+    url: "{{ opensearch_repo_key_url }}"
+    dest: /tmp/opensearch.key.asc
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Add GPG key
+  ansible.builtin.command:
+    cmd: "gpg --dearmor --batch --yes -o {{ opensearch_repo_key_file }} /tmp/opensearch.key.asc"
+  changed_when: true
+
+- name: Add repository
+  ansible.builtin.template:
+    src: "templates/{{ repo.tmpl_prefix }}.sources.j2"
+    dest: "/etc/apt/sources.list.d/{{ repo.filename_prefix }}-{{ opensearch_repo_version }}.sources"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - tmpl_prefix: apt
+      filename_prefix: opensearch
+    - tmpl_prefix: apt.dashboards
+      filename_prefix: opensearch-dashboards
+  loop_control:
+    loop_var: repo
+    label: "{{ repo.filename_prefix }}"
+
+- name: Add repository preference
+  ansible.builtin.template:
+    src: templates/apt.pref.j2
+    dest: /etc/apt/preferences.d/opensearch
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Synchronize package information
+  ansible.builtin.apt:
+    update_cache: true
