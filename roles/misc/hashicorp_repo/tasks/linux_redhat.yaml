@@ -1,0 +1,7 @@
+- name: Add repository
+  ansible.builtin.get_url:
+    url: "https://{{ hashicorp_repo_rpm_domain }}/{{ ansible_facts.distribution | lower }}/hashicorp.repo"
+    dest: /etc/yum.repos.d/hashicorp.repo
+    owner: root
+    group: root
+    mode: "0644"
