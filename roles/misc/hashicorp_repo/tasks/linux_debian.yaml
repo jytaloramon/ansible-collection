@@ -1,0 +1,38 @@
+- name: Get Architecture
+  ansible.builtin.command:
+    cmd: dpkg --print-architecture
+  register: hashicorp_repo_arch
+  changed_when: false
+
+- name: Download GPG key
+  ansible.builtin.get_url:
+    url: "{{ hashicorp_repo_apt.key_url }}"
+    dest: /tmp/hashicorp-archive.key.asc
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Add GPG key
+  ansible.builtin.command:
+    cmd: "gpg --dearmor --batch --yes -o {{ hashicorp_repo_key_file }} /tmp/hashicorp-archive.key.asc"
+  changed_when: true
+
+- name: Add repository
+  ansible.builtin.template:
+    src: templates/apt.sources.j2
+    dest: /etc/apt/sources.list.d/hashicorp.sources
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Add repository preference
+  ansible.builtin.template:
+    src: templates/apt.pref.j2
+    dest: /etc/apt/preferences.d/hashicorp
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Synchronize package information
+  ansible.builtin.apt:
+    update_cache: true

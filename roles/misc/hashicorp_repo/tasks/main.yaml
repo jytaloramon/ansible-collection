@@ -1,13 +1,21 @@
-- name: Set OS family
+- name: Set OS facts
   ansible.builtin.set_fact:
+    hashicorp_repo_os_type: "{{ ansible_facts.system | lower }}"
     hashicorp_repo_os_family: "{{ ansible_facts.os_family | lower }}"
 
-- name: OS support check
+- name: OS support check - Type
   ansible.builtin.assert:
-    that: "hashicorp_repo_os_family in ['debian']"
-    success_msg: "Supported OS family."
-    fail_msg: "Unsupported OS family."
+    that: hashicorp_repo_os_type == 'linux'
+    success_msg: "Supported OS type."
+    fail_msg: "Unsupported OS type: {{ hashicorp_repo_os_type }}."
     quiet: true
 
-- name: Include OS family tasks
-  ansible.builtin.include_tasks: "{{ hashicorp_repo_os_family }}.yaml"
+- name: OS support check - Family
+  ansible.builtin.assert:
+    that: "hashicorp_repo_os_family in ['debian', 'redhat']"
+    success_msg: "Supported OS family."
+    fail_msg: "Unsupported OS family: {{ hashicorp_repo_os_family }}."
+    quiet: true
+
+- name: Includes tasks - OS-based
+  ansible.builtin.include_tasks: "{{ hashicorp_repo_os_type }}_{{ hashicorp_repo_os_family }}.yaml"
