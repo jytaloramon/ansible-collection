@@ -1,0 +1,7 @@
+# Required
+advertise:
+  api_addr: http://127.0.0.1:8200 # Required
+  cluster_addr: http://127.0.0.1:8201 # Required
+
+# Default(info)
+log_level: debug

@@ -1,3 +1,8 @@
+- name: Include vars - Config
+  ansible.builtin.include_vars:
+    file: "{{ hashicorp_vault_config.config_file | default('empty.yaml') }}"
+    name: hc_vault_iconfig
+
 - name: Set OS facts
   ansible.builtin.set_fact:
     hashicorp_vault_os_type: "{{ ansible_facts.system | lower }}"

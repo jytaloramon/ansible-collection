@@ -2,15 +2,15 @@
 
 # Core
 pid_file      = "{{ hashicorp_vault_dir.run }}/vault.pid"
-cluster_name  = "cluster-name"
+cluster_name  = "{{ hashicorp_vault_config.name }}"
 disable_mlock = true
 
 default_max_request_duration = "60s"
 default_lease_ttl            = "30d"
 max_lease_ttl                = "90d"
 
-api_addr     = "http://127.0.0.1:8200"
-cluster_addr = "http://127.0.0.1:8201"
+api_addr     = "{{ hc_vault_iconfig.advertise.api_addr }}"
+cluster_addr = "{{ hc_vault_iconfig.advertise.cluster_addr }}"
 ui           = true
 
 # Listener 
@@ -25,7 +25,7 @@ listener "tcp" {
 }
 
 # Logging
-log_level = "info"
+log_level = "{{ hc_vault_iconfig.log_level | default('info') }}"
 log_file  = "{{ hashicorp_vault_dir.logs }}/vault.log"
 
 # Storage
