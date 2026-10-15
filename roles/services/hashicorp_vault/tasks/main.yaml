@@ -71,6 +71,14 @@
     loop_var: dir
     label: "{{ dir.path }}"
 
+- name: Deploy Vault configuration file
+  ansible.builtin.template:
+    src: templates/vault.hcl.j2
+    dest: "{{ hashicorp_vault_dir.conf }}/vault.hcl"
+    owner: "{{ hashicorp_vault_root_user.uid }}"
+    group: "{{ hashicorp_vault_user.gid }}"
+    mode: "0640"
+
 - name: Create Systemd directory - Override
   ansible.builtin.file:
     path: /etc/systemd/system/vault.service.d

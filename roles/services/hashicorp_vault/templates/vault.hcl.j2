@@ -1,0 +1,44 @@
+# HashiCorp Vault configuration file
+
+# Core
+pid_file      = "{{ hashicorp_vault_dir.run }}/vault.pid"
+cluster_name  = "cluster-name"
+disable_mlock = true
+
+default_max_request_duration = "60s"
+default_lease_ttl            = "30d"
+max_lease_ttl                = "90d"
+
+api_addr     = "http://127.0.0.1:8200"
+cluster_addr = "http://127.0.0.1:8201"
+ui           = true
+
+# Listener 
+listener "unix" {
+  address     = "{{ hashicorp_vault_dir.run }}/vault.sock"
+  socket_mode = "640"
+}
+
+listener "tcp" {
+  address     = "0.0.0.0:8200"
+  tls_disable = true
+}
+
+# Logging
+log_level = "info"
+log_file  = "{{ hashicorp_vault_dir.logs }}/vault.log"
+
+# Storage
+storage "raft" {
+  path = "{{ hashicorp_vault_dir.data }}"
+}
+
+# Security
+
+## User Lockout
+user_lockout "all" {
+  lockout_threshold     = "5"
+  lockout_counter_reset = "15m"
+  lockout_duration      = "30m"
+}
+
