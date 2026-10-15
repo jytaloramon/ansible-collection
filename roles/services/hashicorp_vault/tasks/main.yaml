@@ -1,0 +1,67 @@
+- name: Set OS facts
+  ansible.builtin.set_fact:
+    hashicorp_vault_os_type: "{{ ansible_facts.system | lower }}"
+    hashicorp_vault_os_family: "{{ ansible_facts.os_family | lower }}"
+
+- name: OS support check - Type
+  ansible.builtin.assert:
+    that: hashicorp_vault_os_type == 'linux'
+    success_msg: "Supported OS type."
+    fail_msg: "Unsupported OS type: {{ hashicorp_vault_os_type }}."
+    quiet: true
+
+- name: OS support check - Family
+  ansible.builtin.assert:
+    that: "hashicorp_vault_os_family in ['debian', 'redhat']"
+    success_msg: "Supported OS family."
+    fail_msg: "Unsupported OS family: {{ hashicorp_vault_os_family }}."
+    quiet: true
+
+- name: Install package
+  ansible.builtin.package:
+    name: "vault{{ hashicorp_vault_config.pkg_version | default }}"
+    state: present
+
+- name: Stop service
+  ansible.builtin.service:
+    name: vault
+    state: stopped
+    enabled: false
+
+- name: Create system group
+  ansible.builtin.group:
+    name: "{{ hashicorp_vault_user.name }}"
+    gid: "{{ hashicorp_vault_user.gid }}"
+    system: true
+    state: present
+
+- name: Create system user
+  ansible.builtin.user:
+    name: "{{ hashicorp_vault_user.name }}"
+    uid: "{{ hashicorp_vault_user.uid }}"
+    password: "*"
+    group: "{{ hashicorp_vault_user.name }}"
+    groups: "{{ hashicorp_vault_user.groups }}"
+    create_home: false
+    home: /nonexistent
+    shell: "{{ hashicorp_vault_user.shell }}"
+    comment: "{{ hashicorp_vault_user.gecos }}"
+    system: true
+    state: present
+
+- name: Create directory
+  ansible.builtin.file:
+    path: "{{ dir.path }}"
+    state: directory
+    owner: "{{ dir.owner | default(hashicorp_vault_user.uid) }}"
+    group: "{{ dir.group | default(hashicorp_vault_user.gid) }}"
+    mode: "{{ dir.mode | default('0750') }}"
+  loop:
+    - path: "{{ hashicorp_vault_dir.conf }}"
+      owner: "{{ hashicorp_vault_root_user.uid }}"
+    - path: "{{ hashicorp_vault_dir.data }}"
+      mode: "0700"
+    - path: "{{ hashicorp_vault_dir.logs }}"
+  loop_control:
+    loop_var: dir
+    label: "{{ dir.path }}"

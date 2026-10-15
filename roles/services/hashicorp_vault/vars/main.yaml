@@ -1,0 +1,17 @@
+hashicorp_vault_root_user:
+  uid: 0
+  gid: 0
+
+hashicorp_vault_user:
+  name: vault
+  uid: 1024
+  gid: 1024
+  gecos: HashiCorp Vault
+  shell: /usr/sbin/nologin
+  groups: []
+
+hashicorp_vault_dir:
+  conf: /etc/vault.d
+  data: /var/lib/hashicorp-vault
+  logs: /var/log/hashicorp-vault
+  run: /run/hashicorp-vault
