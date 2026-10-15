@@ -28,6 +28,11 @@
     state: stopped
     enabled: false
 
+- name: Remove default data directory
+  ansible.builtin.file:
+    path: /opt/vault
+    state: absent
+
 - name: Create system group
   ansible.builtin.group:
     name: "{{ hashicorp_vault_user.name }}"
@@ -65,3 +70,25 @@
   loop_control:
     loop_var: dir
     label: "{{ dir.path }}"
+
+- name: Create Systemd directory - Override
+  ansible.builtin.file:
+    path: /etc/systemd/system/vault.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy Systemd service - Override
+  ansible.builtin.template:
+    src: templates/systemd.conf.j2
+    dest: /etc/systemd/system/vault.service.d/override.conf
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Start service
+  ansible.builtin.service:
+    name: vault
+    state: started
+    enabled: true

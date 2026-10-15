@@ -1,0 +1,6 @@
+[Service]
+# Runtime directory
+RuntimeDirectory={{ hashicorp_vault_dir.run | split('/') | last }}
+RuntimeDirectoryMode=0755
+RuntimeDirectoryPreserve=no
+
